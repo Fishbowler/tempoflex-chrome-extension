@@ -1,0 +1,12 @@
+body {
+  padding: 20px;
+  width: 120px
+}
+
+span {
+  font-size: 24
+}
+
+input[type=text] {
+  width: 300px
+}
