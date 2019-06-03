@@ -152,18 +152,18 @@ const getData = (callback) => {
         callback(testdata)
         return
     }
-    getSettings(
-        getTempoUrl(settings, (tempoUrl) => {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', tempoUrl, true);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState == 4) {
-                    callback(JSON.parse(xhr.responseText));
-                }
+    getSettings((settings) => {
+      getTempoUrl(settings, (tempoUrl) => {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', tempoUrl, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                callback(JSON.parse(xhr.responseText));
             }
-            xhr.send();
-        })
-    );
+        }
+        xhr.send();
+      })
+    });
 }
 
 const setPopupText = (text) => {

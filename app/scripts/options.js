@@ -1,5 +1,12 @@
 'use strict';
 
+const defaults = {
+    jiraBaseUrl: 'https://myjira.net',
+    periods: (new Date()).getMonth() + 1,
+    includeToday: false,
+    username: 'jbloggs'
+  }
+
 const saveOptions = () => {
     const options = {
         jiraBaseUrl: document.getElementById('jiraURL').value,
@@ -7,7 +14,9 @@ const saveOptions = () => {
         includeToday: document.getElementById('includeToday').checked
     }
 
-    chrome.storage.sync.set(options, ()=>{
+    const optionsToSave = Object.assign({}, defaults, options)
+
+    chrome.storage.sync.set(optionsToSave, ()=>{
         var status = document.getElementById('saved');
         status.textContent = 'Options saved.';
         setTimeout(function() {
@@ -17,17 +26,12 @@ const saveOptions = () => {
 }
 
 const restoreOptions = () => {
-    const defaults = {
-        jiraBaseUrl: 'https://myjira.net',
-        periods: (new Date()).getMonth() + 1,
-        includeToday: false,
-        username: 'jbloggs'
-    }
-
-    chrome.storage.sync.get(defaults, (options)=>{
-        document.getElementById('jiraURL').value = options.jiraBaseUrl,
-        document.getElementById('username').value = options.username,
-        document.getElementById('includeToday').checked = options.includeToday
+    const keys = Object.keys(defaults)
+    chrome.storage.sync.get(keys, (options)=>{
+        const displayableOptions = Object.assign({}, defaults, options)
+        document.getElementById('jiraURL').value = displayableOptions.jiraBaseUrl,
+        document.getElementById('username').value = displayableOptions.username,
+        document.getElementById('includeToday').checked = displayableOptions.includeToday
     })
 }
 
