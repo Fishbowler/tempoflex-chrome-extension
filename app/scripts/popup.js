@@ -156,11 +156,9 @@ const getData = (callback) => {
       getTempoUrl(settings, (tempoUrl) => {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', tempoUrl, true);
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4) {
+        xhr.onload = function() {
                 callback(JSON.parse(xhr.responseText));
             }
-        }
         xhr.send();
       })
     });
