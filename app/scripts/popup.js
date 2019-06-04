@@ -154,14 +154,18 @@ const getData = (callback) => {
     }
     getSettings((settings) => {
       getTempoUrl(settings, (tempoUrl) => {
+        fetchDataFromTempo(tempoUrl, callback)
+      })
+    });
+}
+
+const fetchDataFromTempo = (tempoUrl, callback) => {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', tempoUrl, true);
         xhr.onload = function() {
                 callback(JSON.parse(xhr.responseText));
             }
         xhr.send();
-      })
-    });
 }
 
 const setPopupText = (text) => {
