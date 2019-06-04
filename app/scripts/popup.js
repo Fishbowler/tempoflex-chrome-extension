@@ -179,3 +179,38 @@ getData((response) => {
     console.log(flexText)
     setPopupText(flexText)
 })
+
+const isWeekend = (() => {
+  const dayOfWeek = (new Date()).getDay()
+  if(dayOfWeek == 0 || dayOfWeek == 6){
+    return true
+  }
+  return false
+})
+
+const getBankHolidayData = ((callback) => {
+  const govBankHolidays = 'https://www.gov.uk/bank-holidays.json'
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', govBankHolidays, true);
+  xhr.onload = function() {
+    try {
+      const bhData = JSON.parse(xhr.responseText)
+      const bhDateArray = bhData['england-and-wales']['events']
+      const bhDatesOnly = bhDateArray.reduce((acc, val) => acc.concat(val.date), [])
+      callback(bhDatesOnly);
+    }
+    catch(e){
+      console.log('Failed to fetch bank holiday data')
+      callback({})
+    }
+  }
+  xhr.send();
+})
+
+const isBankHoliday = ((callback) => {
+  getBankHolidayData((bankHolidays)=>{
+    const today = (new Date()).toUTCString().substring(0,10)
+    callback(bankHolidays.includes(today))
+  })
+})
+
