@@ -16,8 +16,20 @@ const getFlexDirectionText = (flex) => {
   return 'exactly'
 }
 
-const flexPrinter = (seconds) => {
-  return humanizeDuration(seconds * 1000) + ' ' + getFlexDirectionText(seconds)
+const flexPrinter = (seconds, includeToday) => {
+  const flexDirection = getFlexDirectionText(seconds) // ahead/behind
+  const positiveSeconds = Math.abs(seconds) //Deal with positive numbers - we're already got direction
+  const dayInSeconds = 7.5 * 60 * 60  //7.5 hours in seconds
+  const daysOfFlex = Math.floor(positiveSeconds / dayInSeconds)
+  const remainingSeconds = positiveSeconds - (daysOfFlex * dayInSeconds)
+  const readableDuration = humanizeDuration(remainingSeconds * 1000)
+  
+  let printerText = (daysOfFlex > 0 ? `${daysOfFlex} days, ` : '') //Number of days
+  printerText += `${readableDuration} ${flexDirection}`
+  if(includeToday){
+    printerText += ' (not including today)'
+}
+  return printerText
 }
 
 const getSettings = (callback) => {
