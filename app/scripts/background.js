@@ -3,7 +3,6 @@
 const defaults = {
   jiraBaseUrl: 'https://myjira.net',
   periods: (new Date()).getMonth() + 1,
-  includeToday: false,
   username: 'jbloggs'
 }
 

@@ -3,20 +3,60 @@
 const humanizeDuration = require('humanize-duration')
 const testMode = false
 
-const flexCalculator = (data = [{}]) => {
-    const flexAccumulator = (accumulator, currentValue)=>{
-        return accumulator + currentValue.workedSeconds - currentValue.requiredSecondsRelativeToday
+const flexCalculator = (data = [{}], settings) => {
+  const flexAccumulator = (accumulator, currentValue) => {
+    return accumulator + currentValue.workedSeconds - currentValue.requiredSecondsRelativeToday
+  }
+
+  let initialBalance = data.reduce(flexAccumulator, 0)
+
+  return isWorkingDay()
+  .then(isWorkDay => {
+    if(!isWorkDay){
+      return Promise.resolve(initialBalance)
+    } else {
+      return getTempoFudgeForToday(settings)
+        .then(fudge => {
+          return Promise.resolve(initialBalance - fudge)
+        })
     }
-    return data.reduce(flexAccumulator, 0)
+  })
+}
+
+const getTempoFudgeForToday = (settings) => {
+  const todayAccumulator = (accumulator, currentValue) => {
+    return accumulator + currentValue.timeSpentSeconds
+  }
+
+  let fudge = 0
+  const workingDayInSeconds = 7.5 * 60 * 60
+  
+  fudge = fudge - workingDayInSeconds //Remove tempo's 7.5 debt at the beginning of the day
+  const worklogURL = getTempoWorklogsUrl(settings)
+  
+  return fetchWorklogDataFromTempo(worklogURL, settings.username)
+  .then(today => {
+    const totalSecondsToday = today.reduce(todayAccumulator, 0)
+    if(totalSecondsToday >= workingDayInSeconds){
+      fudge += workingDayInSeconds
+    } else {
+      fudge += totalSecondsToday
+    }
+    return Promise.resolve(fudge)
+  })
 }
 
 const getFlexDirectionText = (flex) => {
-  if(flex < 0){ return 'behind'}
-  if(flex > 0){ return 'ahead'}
+  if (flex < 0) {
+    return 'behind'
+  }
+  if (flex > 0) {
+    return 'ahead'
+  }
   return 'exactly'
 }
 
-const flexPrinter = (seconds, includeToday) => {
+const flexPrinter = (seconds) => {
   const flexDirection = getFlexDirectionText(seconds) // ahead/behind
   const positiveSeconds = Math.abs(seconds) //Deal with positive numbers - we're already got direction
   const dayInSeconds = 7.5 * 60 * 60  //7.5 hours in seconds
@@ -26,158 +66,197 @@ const flexPrinter = (seconds, includeToday) => {
   
   let printerText = (daysOfFlex > 0 ? `${daysOfFlex} days, ` : '') //Number of days
   printerText += `${readableDuration} ${flexDirection}`
-  if(includeToday){
-    printerText += ' (not including today)'
-}
   return printerText
 }
 
-const getSettings = (callback) => {
-    chrome.storage.sync.get(['jiraBaseUrl', 'periods', 'username'], callback)
+const getSettings = () => {
+  return new Promise((resolve, reject) => {
+    chrome.storage.sync.get(['jiraBaseUrl', 'periods', 'username'], (settings) => {
+      if (chrome.runtime.lastError) {
+        console.warn('Failed to get settings - Storage returned an error');
+        reject(chrome.runtime.lastError)
+      } else if (!settings) {
+        console.warn('Failed to get settings - Empty settings returned')
+        reject(new Error('No settings returned'))
+      } else {
+        resolve(settings)
+      }
+    })
+  })
 }
 
-const getTempoUrl = (settings, callback) => {
-    const relativePath = `/rest/tempo-timesheets/4/timesheet-approval/approval-statuses/?userKey=${settings.username}&numberOfPeriods=${settings.periods}`
-    const tempoUrl = new URL(relativePath, settings.jiraBaseUrl).toString()
-    callback(tempoUrl)
+const getTempoPeriodsUrl = (settings) => {
+  const relativePath = `/rest/tempo-timesheets/4/timesheet-approval/approval-statuses/?userKey=${settings.username}&numberOfPeriods=${settings.periods}`
+  const tempoUrl = new URL(relativePath, settings.jiraBaseUrl).toString()
+  return tempoUrl
 }
 
-const getData = (callback) => {
-    if(testMode){
-        const testdata = [
-            {
-                'user': {
-                  'self': 'https://jira.surevine.net/rest/api/2/user?username=danc',
-                  'name': 'danc',
-                  'key': 'danc',
-                  'displayName': 'Dan Caseley',
-                  'avatar': 'https://jira.surevine.net/secure/useravatar?size=small&ownerId=danc&avatarId=11585'
-                },
-                'status': 'open',
-                'workedSeconds': 525600,
-                'submittedSeconds': 0,
-                'requiredSeconds': 567000,
-                'requiredSecondsRelativeToday': 513000,
-                'period': {
-                  'periodView': 'PERIOD',
-                  'dateFrom': '2019-05-01',
-                  'dateTo': '2019-05-31'
-                },
-                'smartDateString': 'Current period',
-                'worklogs': {
-                  'href': 'https://jira.surevine.net/rest/tempo-timesheets/3/worklogs?username=danc&dateFrom=2019-05-01&dateTo=2019-05-31'
-                }
-              },
-              {
-                'user': {
-                  'self': 'https://jira.surevine.net/rest/api/2/user?username=danc',
-                  'name': 'danc',
-                  'key': 'danc',
-                  'displayName': 'Dan Caseley',
-                  'avatar': 'https://jira.surevine.net/secure/useravatar?size=small&ownerId=danc&avatarId=11585'
-                },
-                'status': 'ready_to_submit',
-                'workedSeconds': 529200,
-                'submittedSeconds': 0,
-                'requiredSeconds': 540000,
-                'requiredSecondsRelativeToday': 540000,
-                'period': {
-                  'periodView': 'PERIOD',
-                  'dateFrom': '2019-04-01',
-                  'dateTo': '2019-04-30'
-                },
-                'smartDateString': 'Last period',
-                'worklogs': {
-                  'href': 'https://jira.surevine.net/rest/tempo-timesheets/3/worklogs?username=danc&dateFrom=2019-04-01&dateTo=2019-04-30'
-                }
-              },
-              {
-                'user': {
-                  'self': 'https://jira.surevine.net/rest/api/2/user?username=danc',
-                  'name': 'danc',
-                  'key': 'danc',
-                  'displayName': 'Dan Caseley',
-                  'avatar': 'https://jira.surevine.net/secure/useravatar?size=small&ownerId=danc&avatarId=11585'
-                },
-                'status': 'ready_to_submit',
-                'workedSeconds': 575100,
-                'submittedSeconds': 0,
-                'requiredSeconds': 567000,
-                'requiredSecondsRelativeToday': 567000,
-                'period': {
-                  'periodView': 'PERIOD',
-                  'dateFrom': '2019-03-01',
-                  'dateTo': '2019-03-31'
-                },
-                'smartDateString': 'Period 2019-03-01',
-                'worklogs': {
-                  'href': 'https://jira.surevine.net/rest/tempo-timesheets/3/worklogs?username=danc&dateFrom=2019-03-01&dateTo=2019-03-31'
-                }
-              },
-              {
-                'user': {
-                  'self': 'https://jira.surevine.net/rest/api/2/user?username=danc',
-                  'name': 'danc',
-                  'key': 'danc',
-                  'displayName': 'Dan Caseley',
-                  'avatar': 'https://jira.surevine.net/secure/useravatar?size=small&ownerId=danc&avatarId=11585'
-                },
-                'status': 'ready_to_submit',
-                'workedSeconds': 542700,
-                'submittedSeconds': 0,
-                'requiredSeconds': 540000,
-                'requiredSecondsRelativeToday': 540000,
-                'period': {
-                  'periodView': 'PERIOD',
-                  'dateFrom': '2019-02-01',
-                  'dateTo': '2019-02-28'
-                },
-                'smartDateString': 'Period 2019-02-01',
-                'worklogs': {
-                  'href': 'https://jira.surevine.net/rest/tempo-timesheets/3/worklogs?username=danc&dateFrom=2019-02-01&dateTo=2019-02-28'
-                }
-              },
-              {
-                'user': {
-                  'self': 'https://jira.surevine.net/rest/api/2/user?username=danc',
-                  'name': 'danc',
-                  'key': 'danc',
-                  'displayName': 'Dan Caseley',
-                  'avatar': 'https://jira.surevine.net/secure/useravatar?size=small&ownerId=danc&avatarId=11585'
-                },
-                'status': 'ready_to_submit',
-                'workedSeconds': 624600,
-                'submittedSeconds': 0,
-                'requiredSeconds': 594000,
-                'requiredSecondsRelativeToday': 594000,
-                'period': {
-                  'periodView': 'PERIOD',
-                  'dateFrom': '2019-01-01',
-                  'dateTo': '2019-01-31'
-                },
-                'smartDateString': 'Period 2019-01-01',
-                'worklogs': {
-                  'href': 'https://jira.surevine.net/rest/tempo-timesheets/3/worklogs?username=danc&dateFrom=2019-01-01&dateTo=2019-01-31'
-                }
-              }
-        ]
-        callback(testdata)
-        return
+const getTempoWorklogsUrl = (settings) => {
+  const relativePath = '/rest/tempo-timesheets/4/worklogs/search'
+  const tempoUrl = new URL(relativePath, settings.jiraBaseUrl).toString()
+  return tempoUrl
+}
+
+const fetchPeriodDataFromTempo = (tempoUrl) => {
+  if (testMode) {
+    const testdata = [
+      {
+        'user': {
+          'self': 'https://jira.surevine.net/rest/api/2/user?username=danc',
+          'name': 'danc',
+          'key': 'danc',
+          'displayName': 'Dan Caseley',
+          'avatar': 'https://jira.surevine.net/secure/useravatar?size=small&ownerId=danc&avatarId=11585'
+        },
+        'status': 'open',
+        'workedSeconds': 525600,
+        'submittedSeconds': 0,
+        'requiredSeconds': 567000,
+        'requiredSecondsRelativeToday': 513000,
+        'period': {
+          'periodView': 'PERIOD',
+          'dateFrom': '2019-05-01',
+          'dateTo': '2019-05-31'
+        },
+        'smartDateString': 'Current period',
+        'worklogs': {
+          'href': 'https://jira.surevine.net/rest/tempo-timesheets/3/worklogs?username=danc&dateFrom=2019-05-01&dateTo=2019-05-31'
+        }
+      },
+      {
+        'user': {
+          'self': 'https://jira.surevine.net/rest/api/2/user?username=danc',
+          'name': 'danc',
+          'key': 'danc',
+          'displayName': 'Dan Caseley',
+          'avatar': 'https://jira.surevine.net/secure/useravatar?size=small&ownerId=danc&avatarId=11585'
+        },
+        'status': 'ready_to_submit',
+        'workedSeconds': 529200,
+        'submittedSeconds': 0,
+        'requiredSeconds': 540000,
+        'requiredSecondsRelativeToday': 540000,
+        'period': {
+          'periodView': 'PERIOD',
+          'dateFrom': '2019-04-01',
+          'dateTo': '2019-04-30'
+        },
+        'smartDateString': 'Last period',
+        'worklogs': {
+          'href': 'https://jira.surevine.net/rest/tempo-timesheets/3/worklogs?username=danc&dateFrom=2019-04-01&dateTo=2019-04-30'
+        }
+      },
+      {
+        'user': {
+          'self': 'https://jira.surevine.net/rest/api/2/user?username=danc',
+          'name': 'danc',
+          'key': 'danc',
+          'displayName': 'Dan Caseley',
+          'avatar': 'https://jira.surevine.net/secure/useravatar?size=small&ownerId=danc&avatarId=11585'
+        },
+        'status': 'ready_to_submit',
+        'workedSeconds': 575100,
+        'submittedSeconds': 0,
+        'requiredSeconds': 567000,
+        'requiredSecondsRelativeToday': 567000,
+        'period': {
+          'periodView': 'PERIOD',
+          'dateFrom': '2019-03-01',
+          'dateTo': '2019-03-31'
+        },
+        'smartDateString': 'Period 2019-03-01',
+        'worklogs': {
+          'href': 'https://jira.surevine.net/rest/tempo-timesheets/3/worklogs?username=danc&dateFrom=2019-03-01&dateTo=2019-03-31'
+        }
+      },
+      {
+        'user': {
+          'self': 'https://jira.surevine.net/rest/api/2/user?username=danc',
+          'name': 'danc',
+          'key': 'danc',
+          'displayName': 'Dan Caseley',
+          'avatar': 'https://jira.surevine.net/secure/useravatar?size=small&ownerId=danc&avatarId=11585'
+        },
+        'status': 'ready_to_submit',
+        'workedSeconds': 542700,
+        'submittedSeconds': 0,
+        'requiredSeconds': 540000,
+        'requiredSecondsRelativeToday': 540000,
+        'period': {
+          'periodView': 'PERIOD',
+          'dateFrom': '2019-02-01',
+          'dateTo': '2019-02-28'
+        },
+        'smartDateString': 'Period 2019-02-01',
+        'worklogs': {
+          'href': 'https://jira.surevine.net/rest/tempo-timesheets/3/worklogs?username=danc&dateFrom=2019-02-01&dateTo=2019-02-28'
+        }
+      },
+      {
+        'user': {
+          'self': 'https://jira.surevine.net/rest/api/2/user?username=danc',
+          'name': 'danc',
+          'key': 'danc',
+          'displayName': 'Dan Caseley',
+          'avatar': 'https://jira.surevine.net/secure/useravatar?size=small&ownerId=danc&avatarId=11585'
+        },
+        'status': 'ready_to_submit',
+        'workedSeconds': 624600,
+        'submittedSeconds': 0,
+        'requiredSeconds': 594000,
+        'requiredSecondsRelativeToday': 594000,
+        'period': {
+          'periodView': 'PERIOD',
+          'dateFrom': '2019-01-01',
+          'dateTo': '2019-01-31'
+        },
+        'smartDateString': 'Period 2019-01-01',
+        'worklogs': {
+          'href': 'https://jira.surevine.net/rest/tempo-timesheets/3/worklogs?username=danc&dateFrom=2019-01-01&dateTo=2019-01-31'
+        }
+      }
+    ]
+    return Promise.resolve(testdata)
+  }
+  return makeRequest('GET', tempoUrl);
+}
+
+const fetchWorklogDataFromTempo = (tempoUrl, username) => {
+  if (testMode) {
+    return Promise.resolve({})
+  }
+  
+  const today = getTodayString()
+  return makeRequest('POST', tempoUrl, `{"worker":["${username}"], "from": "${today}", "to": "${today}"}`)
+}
+
+function makeRequest(method, url, body) {
+  return new Promise(function (resolve, reject) {
+    var xhr = new XMLHttpRequest()
+    xhr.open(method, url)
+    xhr.setRequestHeader('Content-Type', 'application/json')
+    xhr.onload = function () {
+      if (this.status >= 200 && this.status < 300) {
+        resolve(JSON.parse(xhr.responseText))
+      } else {
+        reject({
+          status: this.status,
+          statusText: xhr.statusText
+        })
+      }
     }
-    getSettings((settings) => {
-      getTempoUrl(settings, (tempoUrl) => {
-        fetchDataFromTempo(tempoUrl, callback)
+    xhr.onerror = function () {
+      reject({
+        status: this.status,
+        statusText: xhr.statusText
       })
-    });
-}
-
-const fetchDataFromTempo = (tempoUrl, callback) => {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', tempoUrl, true);
-        xhr.onload = function() {
-                callback(JSON.parse(xhr.responseText));
-            }
-        xhr.send();
+    }
+    if(body){
+      xhr.send(body)
+    } else {
+      xhr.send()
+    }
+  })
 }
 
 const setPopupText = (text) => {
@@ -185,44 +264,58 @@ const setPopupText = (text) => {
   flexInfo.innerText = text
 }
 
-getData((response) => {
-    const flex = flexCalculator(response)
-    const flexText = flexPrinter(flex)
-    console.log(flexText)
-    setPopupText(flexText)
-})
-
 const isWeekend = (() => {
   const dayOfWeek = (new Date()).getDay()
-  if(dayOfWeek == 0 || dayOfWeek == 6){
+  if (dayOfWeek == 0 || dayOfWeek == 6) {
     return true
   }
   return false
 })
 
-const getBankHolidayData = ((callback) => {
+const getBankHolidayData = (() => {
   const govBankHolidays = 'https://www.gov.uk/bank-holidays.json'
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', govBankHolidays, true);
-  xhr.onload = function() {
-    try {
-      const bhData = JSON.parse(xhr.responseText)
+  return makeRequest('GET', govBankHolidays)
+    .then((bhData) => {
       const bhDateArray = bhData['england-and-wales']['events']
       const bhDatesOnly = bhDateArray.reduce((acc, val) => acc.concat(val.date), [])
-      callback(bhDatesOnly);
-    }
-    catch(e){
-      console.log('Failed to fetch bank holiday data')
-      callback({})
-    }
-  }
-  xhr.send();
+      return Promise.resolve(bhDatesOnly)
+    })
 })
 
-const isBankHoliday = ((callback) => {
-  getBankHolidayData((bankHolidays)=>{
-    const today = (new Date()).toUTCString().substring(0,10)
-    callback(bankHolidays.includes(today))
+const isBankHoliday = (() => {
+  return getBankHolidayData()
+    .then((bankHolidays) => {
+      const today = getTodayString()
+      return Promise.resolve(bankHolidays.includes(today))
+    })
+})
+
+const isWorkingDay = (() => {
+  if(isWeekend()){
+    return Promise.resolve(false)
+  }
+  return isBankHoliday()
+  .then(isBH => {
+    return Promise.resolve(!isBH)
   })
 })
 
+const getTodayString = () => {
+  return (new Date()).toISOString().substring(0, 10)
+}
+
+let settings = {}
+getSettings()
+  .then((settingsFromStorage) => {
+    settings = settingsFromStorage
+    const tempoUrl = getTempoPeriodsUrl(settings)
+    return fetchPeriodDataFromTempo(tempoUrl)
+  })
+  .then((data) => {
+    return flexCalculator(data, settings)
+  })
+  .then((flex) => {
+    const flexText = flexPrinter(flex)
+    console.log(flexText)
+    setPopupText(flexText)
+  })

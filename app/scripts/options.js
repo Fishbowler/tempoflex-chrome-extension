@@ -3,15 +3,13 @@
 const defaults = {
     jiraBaseUrl: 'https://myjira.net',
     periods: (new Date()).getMonth() + 1,
-    includeToday: false,
     username: 'jbloggs'
   }
 
 const saveOptions = () => {
     const options = {
         jiraBaseUrl: document.getElementById('jiraURL').value,
-        username: document.getElementById('username').value,
-        includeToday: document.getElementById('includeToday').checked
+        username: document.getElementById('username').value
     }
 
     const optionsToSave = Object.assign({}, defaults, options)
@@ -30,8 +28,7 @@ const restoreOptions = () => {
     chrome.storage.sync.get(keys, (options)=>{
         const displayableOptions = Object.assign({}, defaults, options)
         document.getElementById('jiraURL').value = displayableOptions.jiraBaseUrl,
-        document.getElementById('username').value = displayableOptions.username,
-        document.getElementById('includeToday').checked = displayableOptions.includeToday
+        document.getElementById('username').value = displayableOptions.username
     })
 }
 
