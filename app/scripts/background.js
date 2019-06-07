@@ -1,10 +1,6 @@
 'use strict';
 
-const defaults = {
-  jiraBaseUrl: 'https://myjira.net',
-  periods: (new Date()).getMonth() + 1,
-  username: 'jbloggs'
-}
+const defaults = require('./lib/defaults.js')
 
 chrome.runtime.onInstalled.addListener(details => {
   if (details.reason == 'install') {
