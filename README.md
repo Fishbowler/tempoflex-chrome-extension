@@ -12,7 +12,7 @@ gulp
 
 ## Installing
 
-* Build the extension (above)
+* Build the extension (above), or download & unzip the [latest release](https://github.com/Fishbowler/tempoflex-chrome-extension/releases/latest)
 * Visit chrome://extensions in Chrome
 * Enable "Developer Mode" (in the top right)
 * Click "Load unpacked"
