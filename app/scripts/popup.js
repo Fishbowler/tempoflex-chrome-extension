@@ -1,6 +1,7 @@
 'use strict';
 
 const humanizeDuration = require('humanize-duration')
+const isWorkingDay = require('workingday-uk')
 const testMode = false
 
 const flexCalculator = (data = [{}], settings) => {
@@ -11,6 +12,9 @@ const flexCalculator = (data = [{}], settings) => {
   let initialBalance = data.reduce(flexAccumulator, 0)
 
   return isWorkingDay()
+  .catch(err => {
+    return Promise.reject('Couldn\'t fetch working day information')
+  })
   .then(isWorkDay => {
     if(!isWorkDay){
       return Promise.resolve(initialBalance)
@@ -20,6 +24,9 @@ const flexCalculator = (data = [{}], settings) => {
           return Promise.resolve(initialBalance - fudge)
         })
     }
+  })
+  .catch(err => {
+    return Promise.reject('Failed to get today from Tempo')
   })
 }
 
@@ -73,11 +80,11 @@ const getSettings = () => {
   return new Promise((resolve, reject) => {
     chrome.storage.sync.get(['jiraBaseUrl', 'periods', 'username'], (settings) => {
       if (chrome.runtime.lastError) {
-        console.warn('Failed to get settings - Storage returned an error');
-        reject(chrome.runtime.lastError)
+        console.warn(chrome.runtime.lastError);
+        reject('Failed to get settings from Chrome Storage')
       } else if (!settings) {
         console.warn('Failed to get settings - Empty settings returned')
-        reject(new Error('No settings returned'))
+        reject(new Error('Check your settings!'))
       } else {
         resolve(settings)
       }
@@ -218,7 +225,10 @@ const fetchPeriodDataFromTempo = (tempoUrl) => {
     ]
     return Promise.resolve(testdata)
   }
-  return makeRequest('GET', tempoUrl);
+  return makeRequest('GET', tempoUrl)
+  .catch(err => {
+    return Promise.reject('Failed to fetch previous periods from Tempo')
+  });
 }
 
 const fetchWorklogDataFromTempo = (tempoUrl, username) => {
@@ -259,46 +269,11 @@ function makeRequest(method, url, body) {
   })
 }
 
-const setPopupText = (text) => {
+const setPopupText = (text, colour = 'black') => {
   let flexInfo = document.getElementById('flextime')
   flexInfo.innerText = text
+  flexInfo.style = `color: ${colour}`
 }
-
-const isWeekend = (() => {
-  const dayOfWeek = (new Date()).getDay()
-  if (dayOfWeek == 0 || dayOfWeek == 6) {
-    return true
-  }
-  return false
-})
-
-const getBankHolidayData = (() => {
-  const govBankHolidays = 'https://www.gov.uk/bank-holidays.json'
-  return makeRequest('GET', govBankHolidays)
-    .then((bhData) => {
-      const bhDateArray = bhData['england-and-wales']['events']
-      const bhDatesOnly = bhDateArray.reduce((acc, val) => acc.concat(val.date), [])
-      return Promise.resolve(bhDatesOnly)
-    })
-})
-
-const isBankHoliday = (() => {
-  return getBankHolidayData()
-    .then((bankHolidays) => {
-      const today = getTodayString()
-      return Promise.resolve(bankHolidays.includes(today))
-    })
-})
-
-const isWorkingDay = (() => {
-  if(isWeekend()){
-    return Promise.resolve(false)
-  }
-  return isBankHoliday()
-  .then(isBH => {
-    return Promise.resolve(!isBH)
-  })
-})
 
 const getTodayString = () => {
   return (new Date()).toISOString().substring(0, 10)
@@ -318,4 +293,7 @@ getSettings()
     const flexText = flexPrinter(flex)
     console.log(flexText)
     setPopupText(flexText)
+  })
+  .catch(err => {
+    setPopupText(err, 'red')
   })

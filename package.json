@@ -4,6 +4,10 @@
   "engines": {
     "node": ">=0.8.0"
   },
+  "scripts": {
+    "build": "gulp",
+    "package": "gulp package"
+  },
   "devDependencies": {
     "@types/chrome": "0.0.86",
     "acorn": "^6.1.1",
@@ -15,7 +19,8 @@
     "gulp-zip": "^3.2.0",
     "humanize-duration": "^3.18.0",
     "run-sequence": "^1.1.5",
-    "vinyl-source-stream": "^2.0.0"
+    "vinyl-source-stream": "^2.0.0",
+    "workingday-uk": "^1.0.0"
   },
   "eslintConfig": {
     "env": {
