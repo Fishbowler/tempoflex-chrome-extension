@@ -18,6 +18,17 @@ gulp
 * Click "Load unpacked"
 * Pick the "dist" folder
 
+## Usage
+
+* Right click the extension
+* Pick "Options"
+* Set your Jira URL and your Jira username
+* Click the extension to see your over/under
+
+## Oddities
+
+Tempo starts the day with every user being behind by 7½ hours (or your configured daily work hours). TempoFlex adapts to this by ignoring today's hours if today is a working day. If it's a UK Bank Holiday, or a weekend, it'll continue to count today's hours (although you probably should take a break...)
+ 
 ## Acknowledgements
 
 [Tempo}(https://www.tempo.io/jira-project-management-tool) is a Jira plugin for recording time, among many other things. The Tempo name is theirs, and I'm in no way affiliated - I just made a tool that I found useful.
