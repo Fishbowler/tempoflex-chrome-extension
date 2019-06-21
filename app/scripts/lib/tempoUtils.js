@@ -45,5 +45,6 @@ function makeRequest(method, url, body) {
 
 module.exports = {
   fetchPeriodDataFromTempo,
-  fetchWorklogDataFromTempo
+  fetchWorklogDataFromTempo,
+  getTodayString //Only exported for testing 🤮
 }
