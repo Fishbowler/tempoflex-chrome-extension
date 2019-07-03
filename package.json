@@ -48,5 +48,11 @@
       }
     }
   },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "app/scripts/**.js"
+    ]
+  },
   "dependencies": {}
 }
