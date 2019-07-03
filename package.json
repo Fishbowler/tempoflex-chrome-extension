@@ -6,7 +6,8 @@
   },
   "scripts": {
     "build": "gulp",
-    "package": "gulp package"
+    "package": "gulp package",
+    "test":"jest"
   },
   "devDependencies": {
     "@types/chrome": "0.0.86",
@@ -52,7 +53,7 @@
   "jest": {
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "app/scripts/**.js"
+      "app/scripts/**/*.js"
     ]
   },
   "dependencies": {}
