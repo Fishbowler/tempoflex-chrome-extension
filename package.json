@@ -7,7 +7,7 @@
   "scripts": {
     "build": "gulp",
     "package": "gulp package",
-    "test":"jest"
+    "test": "jest"
   },
   "devDependencies": {
     "@types/chrome": "0.0.86",
@@ -24,7 +24,7 @@
     "rewire": "^4.0.1",
     "sinon-chrome": "^3.0.1",
     "vinyl-source-stream": "^2.0.0",
-    "workingday-uk": "^1.0.0",
+    "workingday-uk": "^1.1.1",
     "xmlhttprequest": "^1.8.0"
   },
   "eslintConfig": {
