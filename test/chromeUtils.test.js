@@ -9,7 +9,7 @@ const testSettings = {
 
 describe('Get Settings', ()=>{
 
-    beforeAll(function () {
+    beforeAll(()=>{
         global.chrome = chrome;
         chrome.storage.sync.get.yields(testSettings)
     })

@@ -1,5 +1,5 @@
 /**
- * @jest-environment jsdom
+ * @jest-environment node
  */
 
 const tempoUtils = require('../app/scripts/lib/tempoUtils')
@@ -21,12 +21,16 @@ describe('fetchWorklogDataFromTempo', ()=>{
     const tempoWorklogsUrl = 'https://example.com/worklogs'
     const username = 'tester'
 
+    beforeAll(()=>{
+        global.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest
+    })
+
     nock('https://example.com')
         .post('/worklogs', {worker: [username], from:'2019-01-01', to:'2019-01-01'})
         .reply(200, {didWork: true, hours: 1})
 
-    it('should fetch worklog data from Tempo', ()=>{
-        expect.assertions(1)
-        return expect(tempoUtils.fetchWorklogDataFromTempo(tempoWorklogsUrl, username)).resolves.toEqual({didWork: true, hours: 1})
+    it('should fetch worklog data from Tempo', async () => {
+        const worklogData = await tempoUtils.fetchWorklogDataFromTempo(tempoWorklogsUrl, username)
+        return expect(worklogData).toEqual({didWork: true, hours: 1})
     })
 })
