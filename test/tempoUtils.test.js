@@ -25,12 +25,53 @@ describe('fetchWorklogDataFromTempo', ()=>{
         global.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest
     })
 
-    nock('https://example.com')
-        .post('/worklogs', {worker: [username], from:'2019-01-01', to:'2019-01-01'})
-        .reply(200, {didWork: true, hours: 1})
-
     it('should fetch worklog data from Tempo', async () => {
+        nock('https://example.com')
+            .post('/worklogs', {worker: [username], from:'2019-01-01', to:'2019-01-01'})
+            .reply(200, {didWork: true, hours: 1})
         const worklogData = await tempoUtils.fetchWorklogDataFromTempo(tempoWorklogsUrl, username)
         return expect(worklogData).toEqual({didWork: true, hours: 1})
+    })
+
+    it('should error sensibly when it cannot reach Tempo', async () => {
+        nock('https://example.com')
+            .post('/worklogs', {worker: [username], from:'2019-01-01', to:'2019-01-01'})
+            .reply(500, 'Internal Server Error')
+        
+        expect.assertions(1)
+        try {
+            await tempoUtils.fetchWorklogDataFromTempo(tempoWorklogsUrl, username)
+        } catch (e){
+            expect(e).toBe('Failed to fetch previous worklogs from Tempo')
+        }
+    })
+})
+
+describe('fetchPeriodDataFromTempo', ()=>{
+    const tempoPeriodsUrl = 'https://example.com/periods'
+
+    beforeAll(()=>{
+        global.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest
+    })
+
+    it('should fetch worklog data from Tempo', async () => {
+        nock('https://example.com')
+            .get('/periods')
+            .reply(200, {didWork: true, hours: 1})
+        const worklogData = await tempoUtils.fetchPeriodDataFromTempo(tempoPeriodsUrl)
+        return expect(worklogData).toEqual({didWork: true, hours: 1})
+    })
+
+    it('should error sensibly when it cannot reach Tempo', async () => {
+        nock('https://example.com')
+            .get('/periods')
+            .reply(500, 'Internal Server Error')
+        
+        expect.assertions(1)
+        try {
+            await tempoUtils.fetchPeriodDataFromTempo(tempoPeriodsUrl)
+        } catch (e){
+            expect(e).toBe('Failed to fetch previous periods from Tempo')
+        }
     })
 })
