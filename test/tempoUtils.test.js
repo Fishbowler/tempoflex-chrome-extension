@@ -22,7 +22,7 @@ describe('fetchWorklogDataFromTempo', ()=>{
     const username = 'tester'
 
     beforeAll(()=>{
-        global.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest
+        global.XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest
     })
 
     it('should fetch worklog data from Tempo', async () => {
@@ -51,7 +51,7 @@ describe('fetchPeriodDataFromTempo', ()=>{
     const tempoPeriodsUrl = 'https://example.com/periods'
 
     beforeAll(()=>{
-        global.XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest
+        global.XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest
     })
 
     it('should fetch worklog data from Tempo', async () => {
