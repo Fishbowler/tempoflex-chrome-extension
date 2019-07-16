@@ -8,6 +8,9 @@ const fetchPeriodDataFromTempo = (tempoUrl) => {
 const fetchWorklogDataFromTempo = (tempoUrl, username) => {
   const today = getTodayString()
   return makeRequest('POST', tempoUrl, `{"worker":["${username}"], "from": "${today}", "to": "${today}"}`)
+    .catch(err => {
+      return Promise.reject('Failed to fetch previous worklogs from Tempo')
+    });
 }
 
 const getTodayString = () => {

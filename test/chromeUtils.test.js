@@ -8,7 +8,6 @@ const testSettings = {
 }
 
 describe('Get Settings', ()=>{
-
     beforeAll(()=>{
         global.chrome = chrome;
         chrome.storage.sync.get.yields(testSettings)
@@ -30,5 +29,39 @@ describe('Get Settings', ()=>{
         const monthOfTheYear = (new Date()).getMonth() + 1
         const settings = await chromeUtils.getSettings()
         expect(settings.periods).toBe(monthOfTheYear)
+    })
+})
+
+describe('Failing to get settings', ()=>{
+
+    beforeAll(()=>{
+        global.chrome = chrome;
+        console.warn=function(){} //hush now, everything will be fine.
+    })
+
+    beforeEach(()=>{
+        chrome.flush();
+        chrome.storage.sync.get.yields(null)
+    })
+
+    it('will return an error message when no settings exist', async ()=>{
+        expect.assertions(2)
+        try{
+            await chromeUtils.getSettings()
+        } catch(e){
+            expect(e).not.toBeNull()
+            expect(e.message).toBe('Check your settings!')
+        }
+    })
+
+    it('will return an error message when it fails to get settings', async ()=>{
+        chrome.runtime.lastError = 'potato storage'
+        expect.assertions(2)
+        try{
+            await chromeUtils.getSettings()
+        } catch(e){
+            expect(e).not.toBeNull()
+            expect(e.message).toBe('Failed to get settings from Chrome Storage')
+        }
     })
 })
