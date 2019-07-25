@@ -38,9 +38,9 @@ const getTempoFudgeForToday = (settings) => {
   }
 
   let fudge = 0
-  const workingDayInSeconds = 7.5 * 60 * 60
+  const workingDayInSeconds = settings.hoursPerDay * 60 * 60
   
-  fudge = fudge - workingDayInSeconds //Remove tempo's 7.5 debt at the beginning of the day
+  fudge = fudge - workingDayInSeconds //Remove tempo's one-day debt at the beginning of the day
   const worklogURL = stringUtils.getTempoWorklogsUrl(settings)
   
   return tempoUtils.fetchWorklogDataFromTempo(worklogURL, settings.username)
@@ -72,7 +72,7 @@ chromeUtils.getSettings()
     return flexCalculator(data, settings)
   })
   .then((flex) => {
-    const flexText = stringUtils.flexPrinter(flex)
+    const flexText = stringUtils.flexPrinter(flex, settings.hoursPerDay)
     setPopupText(flexText)
   })
   .catch(err => {

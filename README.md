@@ -26,7 +26,7 @@ gulp
 
 ## Oddities
 
-Tempo starts the day with every user being behind by 7½ hours (or your configured daily work hours). TempoFlex adapts to this by ignoring today's hours if today is a working day. If it's a UK Bank Holiday, or a weekend, it'll continue to count today's hours (although you probably should take a break...)
+Tempo starts the day with every user being behind by 7½ hours (or your configured daily work hours). TempoFlex adapts to this by ignoring today's hours if today is a working day, up to the configured work hours. This means that if it's a UK Bank Holiday, or a weekend, it'll count all of today's hours since the "configured" amount should be 0 (so you probably should take a break...)
  
 ## Acknowledgements
 

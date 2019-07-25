@@ -5,7 +5,8 @@ const defaults = require('./lib/defaults.js')
 const saveOptions = () => {
     const options = {
         jiraBaseUrl: document.getElementById('jiraURL').value,
-        username: document.getElementById('username').value
+        username: document.getElementById('username').value,
+        hoursPerDay: document.getElementById('hoursPerDay').value
     }
 
     const optionsToSave = Object.assign({}, defaults, options)
@@ -25,6 +26,7 @@ const restoreOptions = () => {
         const displayableOptions = Object.assign({}, defaults, options)
         document.getElementById('jiraURL').value = displayableOptions.jiraBaseUrl,
         document.getElementById('username').value = displayableOptions.username
+        document.getElementById('hoursPerDay').value = displayableOptions.hoursPerDay
     })
 }
 
