@@ -11,41 +11,38 @@ const flexCalculator = (data = [{}], settings) => {
     return accumulator + currentValue.workedSeconds - currentValue.requiredSecondsRelativeToday
   }
 
-  let initialBalance = data.reduce(flexAccumulator, 0)
+  const initialBalance = data.reduce(flexAccumulator, 0)
+  let runningBalance = initialBalance
 
   return isWorkingDay()
   .catch(err => {
     return Promise.reject('Couldn\'t fetch working day information')
   })
   .then(isWorkDay => {
-    if(!isWorkDay){
-      return Promise.resolve(initialBalance)
-    } else {
-      return getTempoFudgeForToday(settings)
-        .then(fudge => {
-          return Promise.resolve(initialBalance - fudge)
-        })
-    }
+    const fudgeFunction = isWorkDay ? getTempoFudgeForToday : function(){Promise.resolve(0)}
+    return fudgeFunction(settings)
+  })
+  .then(todayFudge => {
+    runningBalance = runningBalance - todayFudge
+    return getTempoFudgeForFuture(settings)
+  })
+  .then(futureFudge => {
+    runningBalance = runningBalance - futureFudge
+    return Promise.resolve(runningBalance)
   })
   .catch(err => {
-    return Promise.reject('Failed to get today from Tempo')
+    return Promise.reject('Failed to get data from Tempo')
   })
 }
 
 const getTempoFudgeForToday = (settings) => {
-  const todayAccumulator = (accumulator, currentValue) => {
-    return accumulator + currentValue.timeSpentSeconds
-  }
 
-  let fudge = 0
   const workingDayInSeconds = settings.hoursPerDay * 60 * 60
-  
-  fudge = fudge - workingDayInSeconds //Remove tempo's one-day debt at the beginning of the day
   const worklogURL = stringUtils.getTempoWorklogsUrl(settings)
   
-  return tempoUtils.fetchWorklogDataFromTempo(worklogURL, settings.username)
-  .then(today => {
-    const totalSecondsToday = today.reduce(todayAccumulator, 0)
+  return tempoUtils.fetchWorklogTotalFromTempo(worklogURL, settings.username)
+  .then(totalSecondsToday => {
+    let fudge = 0 - workingDayInSeconds //Remove tempo's one-day debt at the beginning of the day
     if(totalSecondsToday >= workingDayInSeconds){
       fudge += workingDayInSeconds
     } else {
@@ -53,6 +50,11 @@ const getTempoFudgeForToday = (settings) => {
     }
     return Promise.resolve(fudge)
   })
+}
+
+const getTempoFudgeForFuture = (settings) => {
+  const worklogURL = stringUtils.getTempoWorklogsUrl(settings)
+  return tempoUtils.fetchFutureWorklogTotalFromTempo(worklogURL, settings.username)
 }
 
 const setPopupText = (text, colour = 'black') => {
