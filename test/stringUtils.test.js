@@ -4,7 +4,8 @@ const stringUtils = require('../app/scripts/lib/stringUtils')
 const testSettings = {
     jiraBaseUrl: 'https://jira.testcorp.net',
     periods: 3,
-    username: 'a.smith'
+    username: 'a.smith',
+    hoursPerDay: 8
 }
 
 describe('getFlexDirectionText', ()=>{
@@ -29,11 +30,11 @@ describe('flexPrinter', ()=>{
         [1, '1 second ahead'],
         [-1, '1 second behind'],
         [3600, '1 hour ahead'],
-        [3600*7.5, '1 day ahead'],
-        [-61322, '2 days, 2 hours, 2 minutes, 2 seconds behind']
+        [3600*8, '1 day ahead'], //TODO: Fix as part of #1
+        [-64922, '2 days, 2 hours, 2 minutes, 2 seconds behind']
     ]
     it.each(expectedOutputs)('for %i seconds input, will print "%s"', (seconds, expectedPrinterText)=>{
-        const printerText = stringUtils.flexPrinter(seconds)
+        const printerText = stringUtils.flexPrinter(seconds, testSettings.hoursPerDay)
         expect(printerText).toBe(expectedPrinterText)
     })
 })

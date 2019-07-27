@@ -22,13 +22,13 @@ const getFlexDirectionText = (flex) => {
   return ''
 }
 
-const flexPrinter = (seconds) => {
-  if(seconds == 0){
+const flexPrinter = (secondsOfFlex, hoursPerDay) => {
+  if(secondsOfFlex == 0){
     return 'Your timesheet is balanced!'
   }
-  const flexDirection = getFlexDirectionText(seconds) // ahead/behind
-  const positiveSeconds = Math.abs(seconds) //Deal with positive numbers - we're already got direction
-  const dayInSeconds = 7.5 * 60 * 60 //7.5 hours in seconds
+  const flexDirection = getFlexDirectionText(secondsOfFlex) // ahead/behind
+  const positiveSeconds = Math.abs(secondsOfFlex) //Deal with positive numbers - we're already got direction
+  const dayInSeconds = hoursPerDay * 60 * 60
   const daysOfFlex = Math.floor(positiveSeconds / dayInSeconds)
 
   let printerText = ''

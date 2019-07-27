@@ -3,8 +3,8 @@ const chrome = require('sinon-chrome/extensions');
 
 const testSettings = {
     jiraBaseUrl: 'https://jira.testcorp.net',
-    periods: 3,
-    username: 'a.smith'
+    username: 'a.smith',
+    hoursPerDay: 8
 }
 
 describe('Get Settings', ()=>{
@@ -19,10 +19,11 @@ describe('Get Settings', ()=>{
         expect(chrome.storage.sync.get.calledOnce).toBe(true)
     })
 
-    it('will return the correct URL and username', async ()=>{
+    it('will return the correct URL, username and hours-per-day', async ()=>{
         const settings = await chromeUtils.getSettings()
         expect(settings.jiraBaseUrl).toBe(testSettings.jiraBaseUrl)
         expect(settings.username).toBe(testSettings.username)
+        expect(settings.hoursPerDay).toBe(testSettings.hoursPerDay)
     })
 
     it('will return the correct number of periods', async ()=>{
