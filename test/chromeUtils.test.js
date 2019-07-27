@@ -3,7 +3,6 @@ const chrome = require('sinon-chrome/extensions');
 
 const testSettings = {
     jiraBaseUrl: 'https://jira.testcorp.net',
-    periods: 3,
     username: 'a.smith',
     hoursPerDay: 8
 }
