@@ -7,12 +7,14 @@
   "scripts": {
     "build": "gulp",
     "package": "gulp package",
-    "test": "jest"
+    "test": "jest",
+    "test:ci": "jest && cat ./coverage/lcov.info | coveralls"
   },
   "devDependencies": {
     "@types/chrome": "0.0.86",
     "acorn": "^6.2.1",
     "browserify": "^16.3.0",
+    "coveralls": "^3.0.5",
     "del": "^5.0.0",
     "gulp": "^4.0.2",
     "gulp-clean-css": "^4.2.0",
@@ -55,6 +57,10 @@
     "collectCoverage": true,
     "collectCoverageFrom": [
       "app/scripts/**/*.js"
+    ],
+    "coverageReporters": [
+      "text",
+      "lcov"
     ]
   },
   "dependencies": {}
