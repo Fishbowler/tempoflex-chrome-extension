@@ -5,6 +5,13 @@ const fetchPeriodDataFromTempo = (tempoUrl) => {
     });
 }
 
+const fetchPeriodDataFromTempoAndCalculateFlex = (tempoUrl) => {
+  return fetchPeriodDataFromTempo(tempoUrl)
+  .then(periodData => {
+    return Promise.resolve(sumPeriodFlex(periodData))
+  })
+}
+
 const fetchWorklogDataFromTempo = (tempoUrl, username) => {
   const today = getTodayString()
   return makeRequest('POST', tempoUrl, `{"worker":["${username}"], "from": "${today}", "to": "${today}"}`)
@@ -34,6 +41,14 @@ const fetchFutureWorklogTotalFromTempo = (tempoUrl, username) => {
   .then((worklogs) => {
     return Promise.resolve(sumWorklogs(worklogs))
   })
+}
+
+const sumPeriodFlex = (periods) => {
+  const flexAccumulator = (accumulator, currentValue) => {
+    return accumulator + currentValue.workedSeconds - currentValue.requiredSecondsRelativeToday
+  }
+
+  return periods.reduce(flexAccumulator, 0)
 }
 
 const sumWorklogs = (worklogs) => {
@@ -95,6 +110,7 @@ function makeRequest(method, url, body) {
 
 module.exports = {
   fetchPeriodDataFromTempo,
+  fetchPeriodDataFromTempoAndCalculateFlex,
   fetchWorklogDataFromTempo,
   fetchWorklogTotalFromTempo,
   fetchFutureWorklogDataFromTempo,
