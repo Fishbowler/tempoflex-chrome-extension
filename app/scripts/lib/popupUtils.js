@@ -16,7 +16,7 @@ const flexCalculator = (settings) => {
       return isWorkingDay()
     })
     .catch(err => {
-        return Promise.reject('Couldn\'t fetch working day information')
+      return Promise.reject('Couldn\'t fetch working day information')
     })
     .then(isWorkDay => {
       return fetchTempoAdjustmentForToday(settings, isWorkDay)
@@ -50,7 +50,7 @@ const fetchTempoAdjustmentForToday = (settings, isWorkingDay = true) => {
       if (totalSecondsToday >= workingDayInSeconds) { //...but don't include any work done today as additional flex
         fudge -= workingDayInSeconds //...unless you've worked over a full working day
       } else {
-        fudge -= totalSecondsToday 
+        fudge -= totalSecondsToday
       }
       return Promise.resolve(fudge)
     })
@@ -65,17 +65,12 @@ const getFlex = () => {
   let settings = {}
 
   return chromeUtils.getSettings()
-    .then((settingsFromStorage) => {
+    .then(settingsFromStorage => {
       settings = settingsFromStorage
-      const tempoPeriodsUrl = stringUtils.getTempoPeriodsUrl(settings)
-      return tempoUtils.fetchPeriodDataFromTempo(tempoPeriodsUrl)
+      return flexCalculator(settings)
     })
-    .then((data) => {
-      return flexCalculator(data, settings)
-    })
-    .then((flex) => {
-      const flexText = stringUtils.flexPrinter(flex, settings.hoursPerDay)
-      return flexText
+    .then(flex => {
+      return stringUtils.getFlexString(flex, settings.hoursPerDay)
     })
     .catch(err => {
       return Promise.reject(err)
