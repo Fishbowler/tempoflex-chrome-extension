@@ -41,10 +41,10 @@ const fetchTempoAdjustmentForToday = (settings, isWorkingDay = true) => {
   return tempoUtils.fetchWorklogTotalFromTempo(worklogURL, settings.username)
     .then(totalSecondsToday => {
       let fudge = workingDayInSeconds //Credit back tempo's one-day debt at the beginning of the day
-      if (totalSecondsToday >= workingDayInSeconds) { //...but don't include any work done today as additional flex
-        fudge -= workingDayInSeconds //...unless you've worked over a full working day
+      if (totalSecondsToday >= workingDayInSeconds) { 
+        fudge -= workingDayInSeconds //If you've worked over a full working day, credit that time back
       } else {
-        fudge -= totalSecondsToday
+        fudge -= totalSecondsToday //...else don't include any work done today as additional flex
       }
       return Promise.resolve(fudge)
     })
