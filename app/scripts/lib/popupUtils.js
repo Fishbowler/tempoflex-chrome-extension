@@ -8,32 +8,26 @@ const stringUtils = require('./stringUtils')
 
 const flexCalculator = (settings) => {
   const tempoPeriodsUrl = stringUtils.getTempoPeriodsUrl(settings)
-  let flexBalance = 0
 
-  return tempoUtils.fetchPeriodDataFromTempoAndCalculateFlex(tempoPeriodsUrl)
-    .then(initalFlex => {
-      flexBalance = initalFlex
-      return isWorkingDay()
-    })
-    .catch(err => {
-      return Promise.reject('Couldn\'t fetch working day information')
-    })
-    .then(isWorkDay => {
-      return fetchTempoAdjustmentForToday(settings, isWorkDay)
-    })
-    .then(todayFudge => {
-      flexBalance = flexBalance + todayFudge
-      return fetchTempoAdjustmentForFuture(settings)
-    })
-    .then(futureFudge => {
-      flexBalance = flexBalance - futureFudge
-      return Promise.resolve(flexBalance)
-    })
-    .catch(err => {
-      return Promise.reject('Failed to get data from Tempo')
-    })
+  return isWorkingDay()
+  .catch(err => {
+    return Promise.reject('Couldn\'t fetch working day information')
+  })
+  .then(isWorkDay => {
+    return Promise.all([
+      tempoUtils.fetchPeriodDataFromTempoAndCalculateFlex(tempoPeriodsUrl),
+      fetchTempoAdjustmentForToday(settings, isWorkDay),
+      fetchTempoAdjustmentForFuture(settings)
+    ])
+  })
+  .then(flexValues => {
+    let [periodData, todayAdjustment, futureAdjustment] = flexValues
+    return periodData + todayAdjustment - futureAdjustment
+  })
+  .catch(err => {
+    return Promise.reject('Failed to get data from Tempo')
+  })
 }
-
 
 const fetchTempoAdjustmentForToday = (settings, isWorkingDay = true) => {
 
