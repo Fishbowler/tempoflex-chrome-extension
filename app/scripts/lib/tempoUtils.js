@@ -29,8 +29,8 @@ const fetchWorklogTotalFromTempo = (tempoUrl, username) => {
 
 const fetchFutureWorklogDataFromTempo = (tempoUrl, username) => {
   const tomorrow = getTomorrowString()
-  const lastDayOfThisPeriod = getLastDayOfPeriodString()
-  return makeRequest('POST', tempoUrl, `{"worker":["${username}"], "from": "${tomorrow}", "to": "${lastDayOfThisPeriod}"}`)
+  const thirtyDaysFromNow = getThirtyDaysFromNowString()
+  return makeRequest('POST', tempoUrl, `{"worker":["${username}"], "from": "${tomorrow}", "to": "${thirtyDaysFromNow}"}`)
     .catch(err => {
       return Promise.reject('Failed to fetch future worklogs from Tempo')
     });
@@ -69,10 +69,10 @@ const getTomorrowString = () => {
   return formatDateStringForTempo(tomorrow)
 }
 
-const getLastDayOfPeriodString = () => {
-  const today = new Date()
-  const lastDayOfThisPeriod = new Date(today.getFullYear(), today.getMonth() + 1, 0)
-  return formatDateStringForTempo(lastDayOfThisPeriod)
+const getThirtyDaysFromNowString = () => {
+  let thirtyDaysFromNow = new Date()
+  thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30)
+  return formatDateStringForTempo(thirtyDaysFromNow)
 }
 
 const formatDateStringForTempo = (dateToFormat) => {
@@ -119,5 +119,5 @@ module.exports = {
   //Ones below are only exported for testing 🤮
   getTodayString, 
   getTomorrowString,
-  getLastDayOfPeriodString
+  getThirtyDaysFromNowString
 }

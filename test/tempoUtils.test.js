@@ -22,10 +22,10 @@ describe('getTomorrowString', ()=>{
     })
 })
 
-describe('getLastDayOfPeriodString', ()=>{
+describe('getThirtyDaysFromNowString', ()=>{
     it('returns a string representing a date', ()=>{
-        const lastDayOfThisPeriodString = tempoUtils.getLastDayOfPeriodString()
-        expect(lastDayOfThisPeriodString).toBe('2019-01-31')
+        const thirtyDaysFromNowString = tempoUtils.getThirtyDaysFromNowString()
+        expect(thirtyDaysFromNowString).toBe('2019-01-31')
     })
 })
 
