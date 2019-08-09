@@ -24,7 +24,7 @@ describe('getFlexDirectionText', ()=>{
     })
 })
 
-describe('getFlexString', ()=>{
+describe('convertFlexToString', ()=>{
     const expectedOutputs = [
         [0, 'Your timesheet is balanced!'],
         [1, '1 second ahead'],
@@ -34,7 +34,7 @@ describe('getFlexString', ()=>{
         [-64922, '2 days, 2 hours, 2 minutes, 2 seconds behind']
     ]
     it.each(expectedOutputs)('for %i seconds input, will print "%s"', (seconds, expectedPrinterText)=>{
-        const printerText = stringUtils.getFlexString(seconds, testSettings.hoursPerDay)
+        const printerText = stringUtils.convertFlexToString(seconds, testSettings.hoursPerDay)
         expect(printerText).toBe(expectedPrinterText)
     })
 })

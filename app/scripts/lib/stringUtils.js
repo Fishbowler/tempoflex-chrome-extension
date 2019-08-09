@@ -22,7 +22,7 @@ const getFlexDirectionText = (flex) => {
   return ''
 }
 
-const getFlexString = (secondsOfFlex, hoursPerDay) => {
+const convertFlexToString = (secondsOfFlex, hoursPerDay) => {
   if(secondsOfFlex == 0){
     return 'Your timesheet is balanced!'
   }
@@ -65,5 +65,5 @@ const getFlexString = (secondsOfFlex, hoursPerDay) => {
 module.exports = {
   getTempoPeriodsUrl,
   getTempoWorklogsUrl,
-  getFlexString
+  convertFlexToString
 }

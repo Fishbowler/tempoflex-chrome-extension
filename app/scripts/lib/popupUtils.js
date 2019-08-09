@@ -70,7 +70,7 @@ const getFlex = () => {
       return flexCalculator(settings)
     })
     .then(flex => {
-      return stringUtils.getFlexString(flex, settings.hoursPerDay)
+      return stringUtils.convertFlexToString(flex, settings.hoursPerDay)
     })
     .catch(err => {
       return Promise.reject(err)
