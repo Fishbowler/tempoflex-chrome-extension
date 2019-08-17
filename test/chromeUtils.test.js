@@ -1,11 +1,8 @@
 const chromeUtils = require('../app/scripts/lib/chromeUtils')
-const chrome = require('sinon-chrome/extensions');
+const testFixtures = require('./_fixtures')
+const chrome = require('sinon-chrome/extensions')
 
-const testSettings = {
-    jiraBaseUrl: 'https://jira.testcorp.net',
-    username: 'a.smith',
-    hoursPerDay: 8
-}
+const testSettings = testFixtures.settings
 
 describe('Get Settings', ()=>{
     beforeAll(()=>{

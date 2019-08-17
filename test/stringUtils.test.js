@@ -1,12 +1,6 @@
 const rewire = require('rewire')
 const stringUtils = require('../app/scripts/lib/stringUtils')
-
-const testSettings = {
-    jiraBaseUrl: 'https://jira.testcorp.net',
-    periods: 3,
-    username: 'a.smith',
-    hoursPerDay: 8
-}
+const testFixtures = require('./_fixtures')
 
 describe('getFlexDirectionText', ()=>{
     const getFlexDirectionText = rewire('../app/scripts/lib/stringUtils').__get__('getFlexDirectionText')
@@ -34,21 +28,21 @@ describe('convertFlexToString', ()=>{
         [-64922, '2 days, 2 hours, 2 minutes, 2 seconds behind']
     ]
     it.each(expectedOutputs)('for %i seconds input, will print "%s"', (seconds, expectedPrinterText)=>{
-        const printerText = stringUtils.convertFlexToString(seconds, testSettings.hoursPerDay)
+        const printerText = stringUtils.convertFlexToString(seconds, testFixtures.settings.hoursPerDay)
         expect(printerText).toBe(expectedPrinterText)
     })
 })
 
 describe('getTempoPeriodsUrl', ()=>{
     it('will return the URL based on the settings', ()=>{
-        const periodsUrl = stringUtils.getTempoPeriodsUrl(testSettings)
-        expect(periodsUrl).toBe('https://jira.testcorp.net/rest/tempo-timesheets/4/timesheet-approval/approval-statuses/?userKey=a.smith&numberOfPeriods=3')
+        const periodsUrl = stringUtils.getTempoPeriodsUrl(testFixtures.settings)
+        expect(periodsUrl).toBe(testFixtures.settings.jiraBaseUrl + testFixtures.periodsUrl)
     })
 })
 
 describe('getTempoWorklogsUrl', ()=>{
     it('will return the URL based on the settings', ()=>{
-        const worklogsUrl = stringUtils.getTempoWorklogsUrl(testSettings)
-        expect(worklogsUrl).toBe('https://jira.testcorp.net/rest/tempo-timesheets/4/worklogs/search')
+        const worklogsUrl = stringUtils.getTempoWorklogsUrl(testFixtures.settings)
+        expect(worklogsUrl).toBe(testFixtures.settings.jiraBaseUrl + testFixtures.worklogSearchUrl)
     })
 })

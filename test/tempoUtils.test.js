@@ -3,10 +3,11 @@
  */
 
 const tempoUtils = require('../app/scripts/lib/tempoUtils')
+const testFixtures = require('./_fixtures')
 const nock = require('nock')
-var timekeeper = require('timekeeper')
+const timekeeper = require('timekeeper')
 
-timekeeper.freeze(new Date(1546354800000)) //1st Jan 2019, 15:00
+timekeeper.freeze(testFixtures.freezeTimeJan1st) //1st Jan 2019, 15:00
 
 describe('getTodayString', ()=>{
     it('returns a string representing a date', ()=>{
