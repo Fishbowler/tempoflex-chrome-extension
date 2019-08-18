@@ -163,6 +163,19 @@ describe('fetchPeriodDataFromTempo', ()=>{
             expect(e).toBe('Failed to fetch previous periods from Tempo')
         }
     })
+
+    it('should error sensibly when it cannot reach Tempo without response', async () => {
+        nock('https://example.com')
+            .get('/periods')
+            .replyWithError('Nope')
+        
+        expect.assertions(1)
+        try {
+            await tempoUtils.fetchPeriodDataFromTempo(tempoPeriodsUrl)
+        } catch (e){
+            expect(e).toBe('Failed to fetch previous periods from Tempo')
+        }
+    })
 })
 
 describe('fetchPeriodDataFromTempoAndCalculateFlex', ()=>{
