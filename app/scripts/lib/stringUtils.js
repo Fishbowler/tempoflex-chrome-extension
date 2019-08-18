@@ -13,13 +13,15 @@ const getTempoWorklogsUrl = (settings) => {
 }
 
 const getFlexDirectionText = (flex) => {
-  if (flex < 0) {
-    return 'behind'
+  if(!flex){
+    return '' //Empty or 0
+  } else {
+    if (flex < 0) {
+      return 'behind'
+    } else if (flex > 0) {
+      return 'ahead'
+    }
   }
-  if (flex > 0) {
-    return 'ahead'
-  }
-  return ''
 }
 
 const convertFlexToString = (secondsOfFlex, hoursPerDay) => {

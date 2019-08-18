@@ -16,6 +16,10 @@ describe('getFlexDirectionText', ()=>{
         const flexDirection = getFlexDirectionText(0)
         expect(flexDirection).toBe('')
     })
+    it('will return an empty string for no input', ()=>{
+        const flexDirection = getFlexDirectionText()
+        expect(flexDirection).toBe('')
+    })
 })
 
 describe('convertFlexToString', ()=>{
