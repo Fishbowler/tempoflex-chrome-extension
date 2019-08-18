@@ -3,10 +3,11 @@
  */
 
 const tempoUtils = require('../app/scripts/lib/tempoUtils')
+const testFixtures = require('./_fixtures')
 const nock = require('nock')
-var timekeeper = require('timekeeper')
+const timekeeper = require('timekeeper')
 
-timekeeper.freeze(new Date(1546354800000)) //1st Jan 2019, 15:00
+timekeeper.freeze(testFixtures.freezeTimeJan1st) //1st Jan 2019, 15:00
 
 describe('getTodayString', ()=>{
     it('returns a string representing a date', ()=>{
@@ -22,10 +23,10 @@ describe('getTomorrowString', ()=>{
     })
 })
 
-describe('getLastDayOfPeriodString', ()=>{
+describe('getThirtyDaysFromNowString', ()=>{
     it('returns a string representing a date', ()=>{
-        const lastDayOfThisPeriodString = tempoUtils.getLastDayOfPeriodString()
-        expect(lastDayOfThisPeriodString).toBe('2019-01-31')
+        const thirtyDaysFromNowString = tempoUtils.getThirtyDaysFromNowString()
+        expect(thirtyDaysFromNowString).toBe('2019-01-31')
     })
 })
 
@@ -162,4 +163,75 @@ describe('fetchPeriodDataFromTempo', ()=>{
             expect(e).toBe('Failed to fetch previous periods from Tempo')
         }
     })
+
+    it('should error sensibly when it cannot reach Tempo without response', async () => {
+        nock('https://example.com')
+            .get('/periods')
+            .replyWithError('Nope')
+        
+        expect.assertions(1)
+        try {
+            await tempoUtils.fetchPeriodDataFromTempo(tempoPeriodsUrl)
+        } catch (e){
+            expect(e).toBe('Failed to fetch previous periods from Tempo')
+        }
+    })
+})
+
+describe('fetchPeriodDataFromTempoAndCalculateFlex', ()=>{
+    const tempoPeriodsUrl = 'https://example.com/periods'
+
+    beforeAll(()=>{
+        global.XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest
+    })
+
+    it('should fetch and sum positive period data from Tempo', async () => {
+        nock('https://example.com')
+            .get('/periods')
+            .reply(200, [{workedSeconds: 100, requiredSecondsRelativeToday: 60},
+                        {workedSeconds: 75, requiredSecondsRelativeToday: 60}])
+        const flex = await tempoUtils.fetchPeriodDataFromTempoAndCalculateFlex(tempoPeriodsUrl)
+        return expect(flex).toEqual(55)
+    })
+
+    it('should fetch and sum negative period data from Tempo', async () => {
+        nock('https://example.com')
+            .get('/periods')
+            .reply(200, [{workedSeconds: 50, requiredSecondsRelativeToday: 60},
+                        {workedSeconds: 45, requiredSecondsRelativeToday: 60}])
+        const flex = await tempoUtils.fetchPeriodDataFromTempoAndCalculateFlex(tempoPeriodsUrl)
+        return expect(flex).toEqual(-25)
+    })
+
+    it('should fetch and sum mixed period data from Tempo', async () => {
+        nock('https://example.com')
+            .get('/periods')
+            .reply(200, [{workedSeconds: 70, requiredSecondsRelativeToday: 60},
+                        {workedSeconds: 45, requiredSecondsRelativeToday: 60}])
+        const flex = await tempoUtils.fetchPeriodDataFromTempoAndCalculateFlex(tempoPeriodsUrl)
+        return expect(flex).toEqual(-5)
+    })
+
+    it('should fetch and sum boring period data from Tempo', async () => {
+        nock('https://example.com')
+            .get('/periods')
+            .reply(200, [{workedSeconds: 60, requiredSecondsRelativeToday: 60},
+                        {workedSeconds: 60, requiredSecondsRelativeToday: 60}])
+        const flex = await tempoUtils.fetchPeriodDataFromTempoAndCalculateFlex(tempoPeriodsUrl)
+        return expect(flex).toEqual(0)
+    })
+
+    it('should error sensibly when it cannot reach Tempo', async () => {
+        nock('https://example.com')
+            .get('/periods')
+            .reply(500, 'Internal Server Error')
+        
+        expect.assertions(1)
+        try {
+            await tempoUtils.fetchPeriodDataFromTempoAndCalculateFlex(tempoPeriodsUrl)
+        } catch (e){
+            expect(e).toBe('Failed to fetch previous periods from Tempo')
+        }
+    })
+
 })

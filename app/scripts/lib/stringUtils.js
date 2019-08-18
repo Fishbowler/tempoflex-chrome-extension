@@ -13,16 +13,18 @@ const getTempoWorklogsUrl = (settings) => {
 }
 
 const getFlexDirectionText = (flex) => {
-  if (flex < 0) {
-    return 'behind'
+  if(!flex){
+    return '' //Empty or 0
+  } else {
+    if (flex < 0) {
+      return 'behind'
+    } else if (flex > 0) {
+      return 'ahead'
+    }
   }
-  if (flex > 0) {
-    return 'ahead'
-  }
-  return ''
 }
 
-const flexPrinter = (secondsOfFlex, hoursPerDay) => {
+const convertFlexToString = (secondsOfFlex, hoursPerDay) => {
   if(secondsOfFlex == 0){
     return 'Your timesheet is balanced!'
   }
@@ -65,5 +67,5 @@ const flexPrinter = (secondsOfFlex, hoursPerDay) => {
 module.exports = {
   getTempoPeriodsUrl,
   getTempoWorklogsUrl,
-  flexPrinter
+  convertFlexToString
 }
