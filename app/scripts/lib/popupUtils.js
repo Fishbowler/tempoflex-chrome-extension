@@ -10,9 +10,6 @@ const flexCalculator = (settings) => {
   const tempoPeriodsUrl = stringUtils.getTempoPeriodsUrl(settings)
 
   return isWorkingDay()
-  .catch(err => {
-    return Promise.reject('Couldn\'t fetch working day information')
-  })
   .then(isWorkDay => {
     return Promise.all([
       tempoUtils.fetchPeriodDataFromTempoAndCalculateFlex(tempoPeriodsUrl),
