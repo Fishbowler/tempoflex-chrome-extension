@@ -2,7 +2,7 @@ const rewire = require('rewire')
 const stringUtils = require('../app/scripts/lib/stringUtils')
 const testFixtures = require('./_fixtures')
 
-describe('getFlexDirectionText', ()=>{
+describe.skip('getFlexDirectionText', ()=>{
     const getFlexDirectionText = rewire('../app/scripts/lib/stringUtils').__get__('getFlexDirectionText')
     it('will return "ahead" for positive numbers', ()=>{
         const flexDirection = getFlexDirectionText(10)
