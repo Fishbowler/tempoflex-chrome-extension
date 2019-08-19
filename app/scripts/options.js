@@ -1,34 +1,5 @@
 'use strict';
+const {saveOptions,restoreOptions} = require('./lib/optionsHelper')
 
-const defaults = require('./lib/defaults.js')
-
-const saveOptions = () => {
-    const options = {
-        jiraBaseUrl: document.getElementById('jiraURL').value,
-        username: document.getElementById('username').value,
-        hoursPerDay: document.getElementById('hoursPerDay').value
-    }
-
-    const optionsToSave = Object.assign({}, defaults, options)
-
-    chrome.storage.sync.set(optionsToSave, ()=>{
-        var status = document.getElementById('saved');
-        status.textContent = 'Options saved.';
-        setTimeout(function() {
-          status.textContent = '';
-        }, 750);
-    })
-}
-
-const restoreOptions = () => {
-    const keys = Object.keys(defaults)
-    chrome.storage.sync.get(keys, (options)=>{
-        const displayableOptions = Object.assign({}, defaults, options)
-        document.getElementById('jiraURL').value = displayableOptions.jiraBaseUrl,
-        document.getElementById('username').value = displayableOptions.username
-        document.getElementById('hoursPerDay').value = displayableOptions.hoursPerDay
-    })
-}
-
-document.addEventListener('DOMContentLoaded', restoreOptions);
-document.getElementById('save').addEventListener('click', saveOptions);
+document.addEventListener('DOMContentLoaded', function(){return restoreOptions(document)});
+document.getElementById('save').addEventListener('click', function(){return saveOptions(document)});
