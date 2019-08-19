@@ -25,8 +25,8 @@ module.exports = {
         onePeriod1DayAhead: [{workedSeconds: 2*8*60*60, requiredSecondsRelativeToday: 8*60*60}],
         onePeriod2222Behind: [{workedSeconds: (3*8*60*60)-64922, requiredSecondsRelativeToday: 3*8*60*60}]
     },
-    optionsPage: {
-        regular: `<!doctype html>
+    pages: {
+        options: `<!doctype html>
         <html>
           <head>
             <!-- build:css styles/main.css -->
@@ -53,6 +53,19 @@ module.exports = {
             <div id="saved"></div>
         
             <script src="scripts/options.js"></script>
+          </body>
+        </html>`,
+        popup: `<!doctype html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <!-- build:css styles/main.css -->
+            <link href="styles/main.css" rel="stylesheet">
+            <!-- endbuild -->
+          </head>
+          <body>
+            <span id="flextime">Not Fetched Yet</span>
+            <script src="scripts/popup.js"></script>
           </body>
         </html>`
     }

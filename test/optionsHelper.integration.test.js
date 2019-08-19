@@ -10,7 +10,7 @@ describe('Loading Options', ()=>{
     })
     it('will retrieve my settings', async ()=>{
         expect(chrome.storage.sync.get.notCalled).toBe(true)
-        const doc = new DOMParser().parseFromString(testFixtures.optionsPage.regular, 'text/html')
+        const doc = new DOMParser().parseFromString(testFixtures.pages.options, 'text/html')
         optionsHelper.restoreOptions(doc)
         expect(chrome.storage.sync.get.calledOnce).toBe(true)
         expect(doc.getElementById('jiraURL').value).toBe(testFixtures.settings.jiraBaseUrl)
@@ -29,10 +29,10 @@ describe('Saving Options', ()=>{
     afterAll(()=>{
         jest.useRealTimers()
     })
-    
+
     it('will save my settings', async ()=>{
         expect(chrome.storage.sync.set.notCalled).toBe(true)
-        const doc = new DOMParser().parseFromString(testFixtures.optionsPage.regular, 'text/html')
+        const doc = new DOMParser().parseFromString(testFixtures.pages.options, 'text/html')
         optionsHelper.saveOptions(doc)
         expect(chrome.storage.sync.set.calledOnce).toBe(true)
         expect(doc.getElementById('saved').textContent).toBe('Options saved.')

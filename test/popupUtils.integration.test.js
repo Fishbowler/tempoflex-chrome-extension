@@ -164,4 +164,19 @@ describe('getFlex', ()=>{
             return expect(e.message).toEqual('Failed to get settings from Chrome Storage')
         }
     })
+
+    it('will set the popup with the appropriate value', ()=>{
+        const doc = new DOMParser().parseFromString(testFixtures.pages.popup, 'text/html')
+        const flex = 'Some Flex'
+        popupUtils.setPopupText(doc, flex)
+        expect(doc.getElementById('flextime').innerText).toBe(flex)
+    })
+
+    it('will set the popup with the appropriate error message', ()=>{
+        const doc = new DOMParser().parseFromString(testFixtures.pages.popup, 'text/html')
+        const errorMsg = 'Impossible Flex'
+        popupUtils.setPopupText(doc, errorMsg, 'red')
+        expect(doc.getElementById('flextime').innerText).toBe(errorMsg)
+        expect(doc.getElementById('flextime').style.color).toBe('red')
+    })
 })
