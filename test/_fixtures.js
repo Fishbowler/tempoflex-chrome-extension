@@ -12,12 +12,48 @@ module.exports = {
     worklogs: {
         oneWorklog400: [{task: 'c', timeSpentSeconds: 400}],
         twoWorklogs700: [{task: 'a', timeSpentSeconds: 500}, {task: 'b', timeSpentSeconds: 200}],
-        oneWorklog8hourday: [{task: 'all-day-slog', timeSpentSeconds: 8*60*60}]
+        oneWorklog8hourday: [{task: 'all-day-slog', timeSpentSeconds: 8*60*60}],
+        oneWorklog4hours: [{task: 'all-day-slog', timeSpentSeconds: 4*60*60}]
     },
     periods: {
         twoPeriods1300Ahead: [{workedSeconds: 1001000, requiredSecondsRelativeToday: 1000000},
                             {workedSeconds: 1000300, requiredSecondsRelativeToday: 1000000}],
+        twoPeriods500Behind: [{workedSeconds: 999500, requiredSecondsRelativeToday: 1000000},
+                                {workedSeconds: 1000000, requiredSecondsRelativeToday: 1000000}],
         twoPeriodsBalanced: [{workedSeconds: 1000, requiredSecondsRelativeToday: 1000},
-                            {workedSeconds: 1000, requiredSecondsRelativeToday: 1000}]
+                            {workedSeconds: 1000, requiredSecondsRelativeToday: 1000}],
+        onePeriod1DayAhead: [{workedSeconds: 2*8*60*60, requiredSecondsRelativeToday: 8*60*60}],
+        onePeriod2222Behind: [{workedSeconds: (3*8*60*60)-64922, requiredSecondsRelativeToday: 3*8*60*60}]
+    },
+    optionsPage: {
+        regular: `<!doctype html>
+        <html>
+          <head>
+            <!-- build:css styles/main.css -->
+            <link href="styles/main.css" rel="stylesheet">
+            <!-- endbuild -->
+          </head>
+          <body>
+            <div id="jiraURLWrapper">
+              <div>Jira root URL: </div>
+              <input type="text" id="jiraURL"></input><br><br>
+            </div>
+        
+            <div id="usernameWrapper">
+              <div>Jira username: </div>
+              <input type="text" id="username"></input><br><br>
+            </div>
+        
+            <div id="hpdWrapper">
+              <div>Hours per day: </div>
+              <input type="text" id="hoursPerDay"></input><br><br>
+            </div>
+        
+            <button id="save">Save</button>
+            <div id="saved"></div>
+        
+            <script src="scripts/options.js"></script>
+          </body>
+        </html>`
     }
 }
