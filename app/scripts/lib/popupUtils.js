@@ -26,7 +26,7 @@ const flexCalculator = (settings) => {
   })
 }
 
-const fetchTempoAdjustmentForToday = (settings, isWorkingDay = true) => {
+const fetchTempoAdjustmentForToday = (settings, isWorkingDay) => {
 
   if (!isWorkingDay) { //If it's not a working day, then period data is accurate
     return Promise.resolve(0)

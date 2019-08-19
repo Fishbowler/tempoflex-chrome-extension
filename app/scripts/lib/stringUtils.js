@@ -13,14 +13,10 @@ const getTempoWorklogsUrl = (settings) => {
 }
 
 const getFlexDirectionText = (flex) => {
-  if(!flex){
-    return '' //Empty or 0
+  if (flex < 0) {
+    return 'behind'
   } else {
-    if (flex < 0) {
-      return 'behind'
-    } else if (flex > 0) {
-      return 'ahead'
-    }
+    return 'ahead'
   }
 }
 
