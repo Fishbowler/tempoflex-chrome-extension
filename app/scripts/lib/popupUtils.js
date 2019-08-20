@@ -1,18 +1,16 @@
 'use strict';
 
-const isWorkingDay = require('workingday-uk')
-
 const chromeUtils = require('./chromeUtils')
 const tempoUtils = require('./tempoUtils')
 const stringUtils = require('./stringUtils')
 
 const flexCalculator = (settings) => {
-  const tempoPeriodsUrl = stringUtils.getTempoPeriodsUrl(settings)
 
-  return isWorkingDay()
-  .then(isWorkDay => {
+  return tempoUtils.fetchUserScheduleDataFromTempo(settings)
+  .then(scheduleData => {
+    const isWorkDay = scheduleData.days[0].type == "WORKING_DAY"
     return Promise.all([
-      tempoUtils.fetchPeriodDataFromTempoAndCalculateFlex(tempoPeriodsUrl),
+      tempoUtils.fetchPeriodDataFromTempoAndCalculateFlex(settings),
       fetchTempoAdjustmentForToday(settings, isWorkDay),
       fetchTempoAdjustmentForFuture(settings)
     ])
@@ -33,9 +31,8 @@ const fetchTempoAdjustmentForToday = (settings, isWorkingDay) => {
   }
 
   const workingDayInSeconds = settings.hoursPerDay * 60 * 60
-  const worklogURL = stringUtils.getTempoWorklogsUrl(settings)
 
-  return tempoUtils.fetchWorklogTotalFromTempo(worklogURL, settings.username)
+  return tempoUtils.fetchWorklogTotalFromTempo(settings)
     .then(totalSecondsToday => {
       let fudge = workingDayInSeconds //Credit back tempo's one-day debt at the beginning of the day
       if (totalSecondsToday >= workingDayInSeconds) { 
@@ -48,8 +45,7 @@ const fetchTempoAdjustmentForToday = (settings, isWorkingDay) => {
 }
 
 const fetchTempoAdjustmentForFuture = (settings) => { //You can't flex today because you've already booked time that you'll do tomorrow
-  const worklogURL = stringUtils.getTempoWorklogsUrl(settings)
-  return tempoUtils.fetchFutureWorklogTotalFromTempo(worklogURL, settings.username)
+  return tempoUtils.fetchFutureWorklogTotalFromTempo(settings)
 }
 
 const getFlex = () => {

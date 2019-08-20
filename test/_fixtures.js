@@ -7,6 +7,8 @@ module.exports = {
     },
     periodsUrl: '/rest/tempo-timesheets/4/timesheet-approval/approval-statuses/?userKey=a.smith&numberOfPeriods=1',
     worklogSearchUrl: '/rest/tempo-timesheets/4/worklogs/search',
+    userScheduleUrlJan1st: '/rest/tempo-core/1/user/schedule/?user=a.smith&from=2019-01-01&to=2019-01-01',
+    userScheduleUrlJan3rd: '/rest/tempo-core/1/user/schedule/?user=a.smith&from=2019-01-03&to=2019-01-03',
     freezeTimeJan1st: new Date(1546354800000), //1st Jan 2019, 15:00
     freezeTimeJan3rd: new Date(1546527600000), //3rd Jan 2019, 15:00
     worklogs: {
@@ -24,6 +26,10 @@ module.exports = {
                             {workedSeconds: 1000, requiredSecondsRelativeToday: 1000}],
         onePeriod1DayAhead: [{workedSeconds: 2*8*60*60, requiredSecondsRelativeToday: 8*60*60}],
         onePeriod2222Behind: [{workedSeconds: (3*8*60*60)-64922, requiredSecondsRelativeToday: 3*8*60*60}]
+    },
+    userSchedules: {
+        workingDay: {"numberOfWorkingDays":1,"requiredSeconds":27000,"days":[{"date":"2019-01-03","requiredSeconds":27000,"type":"WORKING_DAY"}]},
+        nonWorkingDay: {"numberOfWorkingDays":0,"requiredSeconds":0,"days":[{"date":"2019-01-01","requiredSeconds":0,"type":"NON_WORKING_DAY"}]}
     },
     pages: {
         options: `<!doctype html>

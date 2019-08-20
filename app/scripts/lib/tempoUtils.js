@@ -1,18 +1,39 @@
-const fetchPeriodDataFromTempo = (tempoUrl) => {
+const getTempoPeriodsUrl = (settings) => {
+  const relativePath = `/rest/tempo-timesheets/4/timesheet-approval/approval-statuses/?userKey=${settings.username}&numberOfPeriods=${settings.periods}`
+  const tempoUrl = new URL(relativePath, settings.jiraBaseUrl).toString()
+  return tempoUrl
+}
+
+const getTempoWorklogsUrl = (settings) => {
+  const relativePath = '/rest/tempo-timesheets/4/worklogs/search'
+  const tempoUrl = new URL(relativePath, settings.jiraBaseUrl).toString()
+  return tempoUrl
+}
+
+const getTempoUserScheduleUrl = (settings, from, to) => {
+  const relativePath = `/rest/tempo-core/1/user/schedule/?user=${settings.username}&from=${from}&to=${to}`
+  const tempoUrl = new URL(relativePath, settings.jiraBaseUrl).toString()
+  return tempoUrl
+}
+
+const fetchPeriodDataFromTempo = (settings) => {
+  const tempoUrl = getTempoPeriodsUrl(settings)
   return makeRequest('GET', tempoUrl)
     .catch(err => {
       return Promise.reject('Failed to fetch previous periods from Tempo')
     });
 }
 
-const fetchPeriodDataFromTempoAndCalculateFlex = (tempoUrl) => {
-  return fetchPeriodDataFromTempo(tempoUrl)
+const fetchPeriodDataFromTempoAndCalculateFlex = (settings) => {
+  return fetchPeriodDataFromTempo(settings)
   .then(periodData => {
     return Promise.resolve(sumPeriodFlex(periodData))
   })
 }
 
-const fetchWorklogDataFromTempo = (tempoUrl, username) => {
+const fetchWorklogDataFromTempo = (settings) => {
+  const tempoUrl = getTempoWorklogsUrl(settings)
+  const username = settings.username
   const today = getTodayString()
   return makeRequest('POST', tempoUrl, `{"worker":["${username}"], "from": "${today}", "to": "${today}"}`)
     .catch(err => {
@@ -20,14 +41,16 @@ const fetchWorklogDataFromTempo = (tempoUrl, username) => {
     });
 }
 
-const fetchWorklogTotalFromTempo = (tempoUrl, username) => {
-  return fetchWorklogDataFromTempo(tempoUrl, username)
+const fetchWorklogTotalFromTempo = (settings) => {
+  return fetchWorklogDataFromTempo(settings)
   .then((worklogs) => {
     return Promise.resolve(sumWorklogs(worklogs))
   })
 }
 
-const fetchFutureWorklogDataFromTempo = (tempoUrl, username) => {
+const fetchFutureWorklogDataFromTempo = (settings) => {
+  const tempoUrl = getTempoWorklogsUrl(settings)
+  const username = settings.username
   const tomorrow = getTomorrowString()
   const thirtyDaysFromNow = getThirtyDaysFromNowString()
   return makeRequest('POST', tempoUrl, `{"worker":["${username}"], "from": "${tomorrow}", "to": "${thirtyDaysFromNow}"}`)
@@ -36,10 +59,20 @@ const fetchFutureWorklogDataFromTempo = (tempoUrl, username) => {
     });
 }
 
-const fetchFutureWorklogTotalFromTempo = (tempoUrl, username) => {
-  return fetchFutureWorklogDataFromTempo(tempoUrl, username)
+const fetchFutureWorklogTotalFromTempo = (settings) => {
+  return fetchFutureWorklogDataFromTempo(settings)
   .then((worklogs) => {
     return Promise.resolve(sumWorklogs(worklogs))
+  })
+}
+
+const fetchUserScheduleDataFromTempo = (settings) => {
+  const from = getTodayString()
+  const to = getTodayString()
+  const tempoUrl = getTempoUserScheduleUrl(settings, from, to)
+  return makeRequest('GET', tempoUrl)
+  .catch(err => {
+    return Promise.reject('Failed to fetch user schedule from Tempo')
   })
 }
 
@@ -47,7 +80,7 @@ const sumPeriodFlex = (periods) => {
   const flexAccumulator = (accumulator, currentValue) => {
     return accumulator + currentValue.workedSeconds - currentValue.requiredSecondsRelativeToday
   }
-
+  
   return periods.reduce(flexAccumulator, 0)
 }
 
@@ -115,9 +148,6 @@ module.exports = {
   fetchWorklogTotalFromTempo,
   fetchFutureWorklogDataFromTempo,
   fetchFutureWorklogTotalFromTempo,
-  sumWorklogs,
-  //Ones below are only exported for testing 🤮
-  getTodayString, 
-  getTomorrowString,
-  getThirtyDaysFromNowString
+  fetchUserScheduleDataFromTempo,
+  sumWorklogs
 }
