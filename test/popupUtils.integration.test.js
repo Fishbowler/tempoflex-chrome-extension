@@ -17,7 +17,9 @@ describe('getFlex', ()=>{
 
     it('will calculate positive flex on a non-working day', async ()=>{
         timekeeper.freeze(testFixtures.freezeTimeJan1st) //1st Jan 2019, 15:00
-
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.userScheduleUrlJan1st)
+            .reply(200, testFixtures.userSchedules.nonWorkingDay)
         nock(testFixtures.settings.jiraBaseUrl)
             .get(testFixtures.periodsUrl)
             .reply(200, testFixtures.periods.twoPeriods1300Ahead)
@@ -36,6 +38,9 @@ describe('getFlex', ()=>{
         timekeeper.freeze(testFixtures.freezeTimeJan1st) //1st Jan 2019, 15:00
 
         nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.userScheduleUrlJan1st)
+            .reply(200, testFixtures.userSchedules.nonWorkingDay)
+        nock(testFixtures.settings.jiraBaseUrl)
             .get(testFixtures.periodsUrl)
             .reply(200, testFixtures.periods.twoPeriods500Behind)
         nock(testFixtures.settings.jiraBaseUrl)
@@ -52,6 +57,9 @@ describe('getFlex', ()=>{
     it('will calculate flex when balanced at the end of a working day', async ()=>{
         timekeeper.freeze(testFixtures.freezeTimeJan3rd)
         nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.userScheduleUrlJan3rd)
+            .reply(200, testFixtures.userSchedules.workingDay)
+        nock(testFixtures.settings.jiraBaseUrl)
             .get(testFixtures.periodsUrl)
             .reply(200, testFixtures.periods.twoPeriodsBalanced)
         nock(testFixtures.settings.jiraBaseUrl)
@@ -66,6 +74,9 @@ describe('getFlex', ()=>{
 
     it('will calculate a 1 day flex on a working day', async ()=>{
         timekeeper.freeze(testFixtures.freezeTimeJan3rd)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.userScheduleUrlJan3rd)
+            .reply(200, testFixtures.userSchedules.workingDay)
         nock(testFixtures.settings.jiraBaseUrl)
             .get(testFixtures.periodsUrl)
             .reply(200, testFixtures.periods.onePeriod1DayAhead)
@@ -82,6 +93,9 @@ describe('getFlex', ()=>{
     it('will calculate flex part way through a working day', async ()=>{
         timekeeper.freeze(testFixtures.freezeTimeJan3rd)
         nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.userScheduleUrlJan3rd)
+            .reply(200, testFixtures.userSchedules.workingDay)
+        nock(testFixtures.settings.jiraBaseUrl)
             .get(testFixtures.periodsUrl)
             .reply(200, testFixtures.periods.twoPeriodsBalanced)
         nock(testFixtures.settings.jiraBaseUrl)
@@ -96,6 +110,9 @@ describe('getFlex', ()=>{
 
     it('will calculate a complex negative flex on a working day', async ()=>{
         timekeeper.freeze(testFixtures.freezeTimeJan3rd)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.userScheduleUrlJan3rd)
+            .reply(200, testFixtures.userSchedules.workingDay)
         nock(testFixtures.settings.jiraBaseUrl)
             .get(testFixtures.periodsUrl)
             .reply(200, testFixtures.periods.onePeriod2222Behind)
@@ -112,6 +129,9 @@ describe('getFlex', ()=>{
     it('will fail gracefully when Jira is unreachable through communications failure', async ()=>{
         expect.assertions(1)
         timekeeper.freeze(testFixtures.freezeTimeJan3rd)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.userScheduleUrlJan3rd)
+            .replyWithError('Nope')
         nock(testFixtures.settings.jiraBaseUrl)
             .get(testFixtures.periodsUrl)
             .replyWithError('Nope')
@@ -132,6 +152,9 @@ describe('getFlex', ()=>{
         expect.assertions(1)
         timekeeper.freeze(testFixtures.freezeTimeJan3rd)
         nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.userScheduleUrlJan3rd)
+            .reply(404, 'Nope')
+        nock(testFixtures.settings.jiraBaseUrl)
             .get(testFixtures.periodsUrl)
             .reply(404, 'Nope')
         nock(testFixtures.settings.jiraBaseUrl)
@@ -147,6 +170,27 @@ describe('getFlex', ()=>{
         }
     })
 
+    it('will fail gracefully when Tempo Core is reachable but Tempo Timesheets is not', async ()=>{
+        expect.assertions(1)
+        timekeeper.freeze(testFixtures.freezeTimeJan3rd)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.userScheduleUrlJan3rd)
+            .reply(200, testFixtures.userSchedules.workingDay)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.periodsUrl)
+            .reply(404, 'Nope')
+        nock(testFixtures.settings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-03', to:'2019-01-03'})
+            .reply(404, 'Nope')
+        nock(testFixtures.settings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-04', to:'2019-02-02'})
+            .reply(404, 'Nope')
+        try {
+            const flex = await popupUtils.getFlex()
+        } catch(e){
+            return expect(e).toEqual('Failed to get data from Tempo')
+        }
+    })
     it('will fail gracefull when Chrome settings are empty', async ()=>{
         chrome.storage.sync.get.yields(null)
         try {

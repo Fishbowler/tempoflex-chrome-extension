@@ -1,17 +1,5 @@
 const humanizeDuration = require('humanize-duration')
 
-const getTempoPeriodsUrl = (settings) => {
-  const relativePath = `/rest/tempo-timesheets/4/timesheet-approval/approval-statuses/?userKey=${settings.username}&numberOfPeriods=${settings.periods}`
-  const tempoUrl = new URL(relativePath, settings.jiraBaseUrl).toString()
-  return tempoUrl
-}
-
-const getTempoWorklogsUrl = (settings) => {
-  const relativePath = '/rest/tempo-timesheets/4/worklogs/search'
-  const tempoUrl = new URL(relativePath, settings.jiraBaseUrl).toString()
-  return tempoUrl
-}
-
 const getFlexDirectionText = (flex) => {
   if (flex < 0) {
     return 'behind'
@@ -61,7 +49,5 @@ const convertFlexToString = (secondsOfFlex, hoursPerDay) => {
 }
 
 module.exports = {
-  getTempoPeriodsUrl,
-  getTempoWorklogsUrl,
   convertFlexToString
 }

@@ -26,7 +26,6 @@
     "sinon-chrome": "^3.0.1",
     "timekeeper": "^2.2.0",
     "vinyl-source-stream": "^2.0.0",
-    "workingday-uk": "^1.1.2",
     "xmlhttprequest": "^1.8.0"
   },
   "eslintConfig": {
