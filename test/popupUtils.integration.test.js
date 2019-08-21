@@ -13,6 +13,8 @@ describe('getFlex', ()=>{
     beforeEach(()=>{
         chrome.storage.sync.get.reset()
         chrome.storage.sync.get.yields(testFixtures.settings)
+        chrome.runtime.lastError = null
+        nock.cleanAll()
     })
 
     it('will calculate positive flex on a non-working day', async ()=>{
