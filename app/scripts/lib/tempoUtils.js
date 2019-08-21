@@ -133,6 +133,15 @@ function makeRequest(method, url, body) {
         statusText: xhr.statusText
       })
     }
+    /* istanbul ignore next */ //Testing HTTP timeouts is too hard.
+    xhr.timeout = 10000
+    /* istanbul ignore next */
+    xhr.ontimeout = function () {
+      reject({
+        status: this.status,
+        statusText: xhr.statusText
+      })
+    }
     if (body) {
       xhr.send(body)
     } else {
