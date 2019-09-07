@@ -3,6 +3,7 @@
 const chromeUtils = require('./chromeUtils')
 const tempoUtils = require('./tempoUtils')
 const stringUtils = require('./stringUtils')
+const TempoError = require('./errorUtils').TempoError
 
 const flexCalculator = (settings) => {
 
@@ -20,7 +21,8 @@ const flexCalculator = (settings) => {
     return periodData + todayAdjustment - futureAdjustment
   })
   .catch(err => {
-    return Promise.reject('Failed to get data from Tempo')
+    thisErr = err instanceof TempoError ? err : new TempoError('Failed to get data from Tempo')
+    return Promise.reject(thisErr)
   })
 }
 
@@ -60,7 +62,8 @@ const getFlex = () => {
       return stringUtils.convertFlexToString(flex, settings.hoursPerDay)
     })
     .catch(err => {
-      return Promise.reject(err)
+      thisErr = err instanceof Error ? err : new Error(err)
+      return Promise.reject(thisErr)
     })
 }
 

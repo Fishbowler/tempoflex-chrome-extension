@@ -13,6 +13,8 @@ describe('getFlex', ()=>{
     beforeEach(()=>{
         chrome.storage.sync.get.reset()
         chrome.storage.sync.get.yields(testFixtures.settings)
+        chrome.runtime.lastError = null
+        nock.cleanAll()
     })
 
     it('will calculate positive flex on a non-working day', async ()=>{
@@ -144,7 +146,7 @@ describe('getFlex', ()=>{
         try {
             const flex = await popupUtils.getFlex()
         } catch(e){
-            return expect(e).toEqual('Failed to get data from Tempo')
+            return expect(e.message).toEqual('Jira couldn\'t be contacted')
         }
     })
 
@@ -154,19 +156,10 @@ describe('getFlex', ()=>{
         nock(testFixtures.settings.jiraBaseUrl)
             .get(testFixtures.userScheduleUrlJan3rd)
             .reply(404, 'Nope')
-        nock(testFixtures.settings.jiraBaseUrl)
-            .get(testFixtures.periodsUrl)
-            .reply(404, 'Nope')
-        nock(testFixtures.settings.jiraBaseUrl)
-            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-03', to:'2019-01-03'})
-            .reply(404, 'Nope')
-        nock(testFixtures.settings.jiraBaseUrl)
-            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-04', to:'2019-02-02'})
-            .reply(404, 'Nope')
         try {
             const flex = await popupUtils.getFlex()
         } catch(e){
-            return expect(e).toEqual('Failed to get data from Tempo')
+            return expect(e.message).toEqual('Jira not found')
         }
     })
 
@@ -188,10 +181,59 @@ describe('getFlex', ()=>{
         try {
             const flex = await popupUtils.getFlex()
         } catch(e){
-            return expect(e).toEqual('Failed to get data from Tempo')
+            return expect(e.message).toEqual('Jira not found')
         }
     })
-    it('will fail gracefull when Chrome settings are empty', async ()=>{
+
+    it('will fail gracefully when user is not logged into Tempo', async ()=>{
+        expect.assertions(1)
+        timekeeper.freeze(testFixtures.freezeTimeJan3rd)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.userScheduleUrlJan3rd)
+            .reply(403, 'Nope')
+        try {
+            const flex = await popupUtils.getFlex()
+        } catch(e){
+            return expect(e.message).toEqual('Not authorised with Jira')
+        }
+    })
+
+    it('will fail gracefully when Jira returns an unexpected HTTP response code', async ()=>{
+        expect.assertions(1)
+        timekeeper.freeze(testFixtures.freezeTimeJan3rd)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.userScheduleUrlJan3rd)
+            .reply(499, 'Potato')
+        try {
+            const flex = await popupUtils.getFlex()
+        } catch(e){
+            return expect(e.message).toEqual('Failed to fetch user schedule from Tempo')
+        }
+    })
+
+    it('will fail gracefully when Jira returns an unexpected HTTP response code for Tempo Timesheets, but a good response to Tempo Core', async ()=>{
+        expect.assertions(1)
+        timekeeper.freeze(testFixtures.freezeTimeJan3rd)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.userScheduleUrlJan3rd)
+            .reply(200, testFixtures.userSchedules.workingDay)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.periodsUrl)
+            .reply(499, 'Potato')
+        nock(testFixtures.settings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-03', to:'2019-01-03'})
+            .reply(499, 'Potato')
+        nock(testFixtures.settings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-04', to:'2019-02-02'})
+            .reply(499, 'Potato')
+        try {
+            const flex = await popupUtils.getFlex()
+        } catch(e){
+            return expect(e.message).toEqual('Failed to fetch previous periods from Tempo')
+        }
+    })
+
+    it('will fail gracefully when Chrome settings are empty', async ()=>{
         chrome.storage.sync.get.yields(null)
         try {
             const flex = await popupUtils.getFlex()
