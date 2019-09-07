@@ -5,5 +5,5 @@ popupUtils.getFlex()
     popupUtils.setPopupText(document, flex)
 })
 .catch(err => {
-    popupUtils.setPopupText(document, err, 'red')
+    popupUtils.setPopupText(document, err.message, 'red')
 })

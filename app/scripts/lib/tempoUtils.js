@@ -1,3 +1,5 @@
+const TempoError = require('./errorUtils').TempoError
+
 const getTempoPeriodsUrl = (settings) => {
   const relativePath = `/rest/tempo-timesheets/4/timesheet-approval/approval-statuses/?userKey=${settings.username}&numberOfPeriods=${settings.periods}`
   const tempoUrl = new URL(relativePath, settings.jiraBaseUrl).toString()
@@ -20,6 +22,9 @@ const fetchPeriodDataFromTempo = (settings) => {
   const tempoUrl = getTempoPeriodsUrl(settings)
   return makeRequest('GET', tempoUrl)
     .catch(err => {
+      if(err instanceof TempoError){
+        return Promise.reject(err)
+      }
       return Promise.reject('Failed to fetch previous periods from Tempo')
     });
 }
@@ -37,6 +42,9 @@ const fetchWorklogDataFromTempo = (settings) => {
   const today = getTodayString()
   return makeRequest('POST', tempoUrl, `{"worker":["${username}"], "from": "${today}", "to": "${today}"}`)
     .catch(err => {
+      if(err instanceof TempoError){
+        return Promise.reject(err)
+      }
       return Promise.reject('Failed to fetch previous worklogs from Tempo')
     });
 }
@@ -55,6 +63,9 @@ const fetchFutureWorklogDataFromTempo = (settings) => {
   const thirtyDaysFromNow = getThirtyDaysFromNowString()
   return makeRequest('POST', tempoUrl, `{"worker":["${username}"], "from": "${tomorrow}", "to": "${thirtyDaysFromNow}"}`)
     .catch(err => {
+      if(err instanceof TempoError){
+        return Promise.reject(err)
+      }
       return Promise.reject('Failed to fetch future worklogs from Tempo')
     });
 }
@@ -72,6 +83,9 @@ const fetchUserScheduleDataFromTempo = (settings) => {
   const tempoUrl = getTempoUserScheduleUrl(settings, from, to)
   return makeRequest('GET', tempoUrl)
   .catch(err => {
+    if(err instanceof TempoError){
+      return Promise.reject(err)
+    }
     return Promise.reject('Failed to fetch user schedule from Tempo')
   })
 }
@@ -147,6 +161,14 @@ function makeRequest(method, url, body) {
     } else {
       xhr.send()
     }
+  })
+  .catch(e => {
+    switch(e.status){
+      case 403: return Promise.reject(new TempoError('Not authorised with Jira'))
+      case 404: return Promise.reject(new TempoError('Jira not found'))
+      case 0: return Promise.reject(new TempoError('Jira couldn\'t be contacted'))
+      default: return Promise.reject(e)
+    }    
   })
 }
 
