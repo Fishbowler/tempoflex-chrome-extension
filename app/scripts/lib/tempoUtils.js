@@ -25,7 +25,7 @@ const fetchPeriodDataFromTempo = (settings) => {
       if(err instanceof TempoError){
         return Promise.reject(err)
       }
-      return Promise.reject('Failed to fetch previous periods from Tempo')
+      return Promise.reject(new TempoError('Failed to fetch previous periods from Tempo'))
     });
 }
 
@@ -42,10 +42,8 @@ const fetchWorklogDataFromTempo = (settings) => {
   const today = getTodayString()
   return makeRequest('POST', tempoUrl, `{"worker":["${username}"], "from": "${today}", "to": "${today}"}`)
     .catch(err => {
-      if(err instanceof TempoError){
-        return Promise.reject(err)
-      }
-      return Promise.reject('Failed to fetch previous worklogs from Tempo')
+      thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch previous worklogs from Tempo')
+      return Promise.reject(thisErr)
     });
 }
 
@@ -63,10 +61,8 @@ const fetchFutureWorklogDataFromTempo = (settings) => {
   const thirtyDaysFromNow = getThirtyDaysFromNowString()
   return makeRequest('POST', tempoUrl, `{"worker":["${username}"], "from": "${tomorrow}", "to": "${thirtyDaysFromNow}"}`)
     .catch(err => {
-      if(err instanceof TempoError){
-        return Promise.reject(err)
-      }
-      return Promise.reject('Failed to fetch future worklogs from Tempo')
+      thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch future worklogs from Tempo')
+      return Promise.reject(thisErr)
     });
 }
 
@@ -83,10 +79,8 @@ const fetchUserScheduleDataFromTempo = (settings) => {
   const tempoUrl = getTempoUserScheduleUrl(settings, from, to)
   return makeRequest('GET', tempoUrl)
   .catch(err => {
-    if(err instanceof TempoError){
-      return Promise.reject(err)
-    }
-    return Promise.reject('Failed to fetch user schedule from Tempo')
+    thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch user schedule from Tempo')
+    return Promise.reject(thisErr)
   })
 }
 

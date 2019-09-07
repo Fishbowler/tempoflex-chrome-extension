@@ -207,7 +207,29 @@ describe('getFlex', ()=>{
         try {
             const flex = await popupUtils.getFlex()
         } catch(e){
-            return expect(e.message).toEqual('Failed to get data from Tempo')
+            return expect(e.message).toEqual('Failed to fetch user schedule from Tempo')
+        }
+    })
+
+    it('will fail gracefully when Jira returns an unexpected HTTP response code for Tempo Timesheets, but a good response to Tempo Core', async ()=>{
+        expect.assertions(1)
+        timekeeper.freeze(testFixtures.freezeTimeJan3rd)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.userScheduleUrlJan3rd)
+            .reply(200, testFixtures.userSchedules.workingDay)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.periodsUrl)
+            .reply(499, 'Potato')
+        nock(testFixtures.settings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-03', to:'2019-01-03'})
+            .reply(499, 'Potato')
+        nock(testFixtures.settings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-04', to:'2019-02-02'})
+            .reply(499, 'Potato')
+        try {
+            const flex = await popupUtils.getFlex()
+        } catch(e){
+            return expect(e.message).toEqual('Failed to fetch previous periods from Tempo')
         }
     })
 
