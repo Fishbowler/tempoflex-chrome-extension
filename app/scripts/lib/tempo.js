@@ -46,7 +46,8 @@ class Tempo {
 
     fetchFutureWorklogTotal() {
         const fetchFutureWorklogDataFromTempo = () => {
-            return this._makeRequest('POST', this.worklogsUrl, `{"worker":["${this.settings.username}"], "from": "${this.tomorrowString}", "to": "${this.thirtyDaysFromNowString}"}`)
+            const payload = `{"worker":["${this.settings.username}"], "from": "${this.tomorrowString}", "to": "${this.thirtyDaysFromNowString}"}`
+            return this._makeRequest('POST', this.worklogsUrl, payload)
                 .catch(err => {
                     let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch future worklogs from Tempo')
                     return Promise.reject(thisErr)
@@ -84,13 +85,13 @@ class Tempo {
             .then(periodData => {
                 let startingTotal = sumPeriodFlex(periodData)
                 console.log(`Starting Total: ${startingTotal}`)
-                if(!this.workingDay) return Promise.resolve(startingTotal)
+                if (!this.workingDay) return Promise.resolve(startingTotal)
 
                 const workingDayInSeconds = this.settings.hoursPerDay * 60 * 60
                 return this.fetchWorklogTotal()
                     .then(totalSecondsToday => {
                         let fudge = workingDayInSeconds //Credit back tempo's one-day debt at the beginning of the day
-                        if (totalSecondsToday >= workingDayInSeconds) { 
+                        if (totalSecondsToday >= workingDayInSeconds) {
                             fudge -= workingDayInSeconds //If you've worked over a full working day, credit that time back
                         } else {
                             fudge -= totalSecondsToday //...else don't include any work done today as additional flex
