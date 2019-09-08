@@ -1,53 +1,26 @@
 'use strict';
 
 const chromeUtils = require('./chromeUtils')
-const tempoUtils = require('./tempoUtils')
 const stringUtils = require('./stringUtils')
 const TempoError = require('./errorUtils').TempoError
+const Tempo = require('./tempo')
 
 const flexCalculator = (settings) => {
 
-  return tempoUtils.fetchUserScheduleDataFromTempo(settings)
-  .then(scheduleData => {
-    const isWorkDay = scheduleData.days[0].type == "WORKING_DAY"
-    return Promise.all([
-      tempoUtils.fetchPeriodDataFromTempoAndCalculateFlex(settings),
-      fetchTempoAdjustmentForToday(settings, isWorkDay),
-      fetchTempoAdjustmentForFuture(settings)
-    ])
-  })
+  const tempo = new Tempo(settings)
+
+  return Promise.all([
+      tempo.fetchPeriodFlexTotal(),
+      tempo.fetchFutureWorklogTotal()
+  ])
   .then(flexValues => {
-    let [periodData, todayAdjustment, futureAdjustment] = flexValues
-    return periodData + todayAdjustment - futureAdjustment
+    let [periodData, futureAdjustment] = flexValues
+    return periodData - futureAdjustment
   })
   .catch(err => {
-    thisErr = err instanceof TempoError ? err : new TempoError('Failed to get data from Tempo')
+    let thisErr = err instanceof TempoError ? err : new TempoError('Failed to get data from Tempo')
     return Promise.reject(thisErr)
   })
-}
-
-const fetchTempoAdjustmentForToday = (settings, isWorkingDay) => {
-
-  if (!isWorkingDay) { //If it's not a working day, then period data is accurate
-    return Promise.resolve(0)
-  }
-
-  const workingDayInSeconds = settings.hoursPerDay * 60 * 60
-
-  return tempoUtils.fetchWorklogTotalFromTempo(settings)
-    .then(totalSecondsToday => {
-      let fudge = workingDayInSeconds //Credit back tempo's one-day debt at the beginning of the day
-      if (totalSecondsToday >= workingDayInSeconds) { 
-        fudge -= workingDayInSeconds //If you've worked over a full working day, credit that time back
-      } else {
-        fudge -= totalSecondsToday //...else don't include any work done today as additional flex
-      }
-      return Promise.resolve(fudge)
-    })
-}
-
-const fetchTempoAdjustmentForFuture = (settings) => { //You can't flex today because you've already booked time that you'll do tomorrow
-  return tempoUtils.fetchFutureWorklogTotalFromTempo(settings)
 }
 
 const getFlex = () => {
@@ -62,7 +35,7 @@ const getFlex = () => {
       return stringUtils.convertFlexToString(flex, settings.hoursPerDay)
     })
     .catch(err => {
-      thisErr = err instanceof Error ? err : new Error(err)
+      let thisErr = err instanceof Error ? err : new Error(err)
       return Promise.reject(thisErr)
     })
 }

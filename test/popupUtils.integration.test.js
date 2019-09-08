@@ -156,6 +156,15 @@ describe('getFlex', ()=>{
         nock(testFixtures.settings.jiraBaseUrl)
             .get(testFixtures.userScheduleUrlJan3rd)
             .reply(404, 'Nope')
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.periodsUrl)
+            .reply(404, 'Nope')
+        nock(testFixtures.settings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-03', to:'2019-01-03'})
+            .reply(404, 'Nope')
+        nock(testFixtures.settings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-04', to:'2019-02-02'})
+            .reply(404, 'Nope')
         try {
             const flex = await popupUtils.getFlex()
         } catch(e){
@@ -191,6 +200,15 @@ describe('getFlex', ()=>{
         nock(testFixtures.settings.jiraBaseUrl)
             .get(testFixtures.userScheduleUrlJan3rd)
             .reply(403, 'Nope')
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.periodsUrl)
+            .reply(403, 'Nope')
+        nock(testFixtures.settings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-03', to:'2019-01-03'})
+            .reply(403, 'Nope')
+        nock(testFixtures.settings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-04', to:'2019-02-02'})
+            .reply(403, 'Nope')
         try {
             const flex = await popupUtils.getFlex()
         } catch(e){
@@ -203,6 +221,15 @@ describe('getFlex', ()=>{
         timekeeper.freeze(testFixtures.freezeTimeJan3rd)
         nock(testFixtures.settings.jiraBaseUrl)
             .get(testFixtures.userScheduleUrlJan3rd)
+            .reply(499, 'Potato')
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.periodsUrl)
+            .reply(499, 'Potato')
+        nock(testFixtures.settings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-03', to:'2019-01-03'})
+            .reply(499, 'Potato')
+        nock(testFixtures.settings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-04', to:'2019-02-02'})
             .reply(499, 'Potato')
         try {
             const flex = await popupUtils.getFlex()
@@ -229,7 +256,7 @@ describe('getFlex', ()=>{
         try {
             const flex = await popupUtils.getFlex()
         } catch(e){
-            return expect(e.message).toEqual('Failed to fetch previous periods from Tempo')
+            return expect(e.message).toEqual('Failed to fetch future worklogs from Tempo')
         }
     })
 
