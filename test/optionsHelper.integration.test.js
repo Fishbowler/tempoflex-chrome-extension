@@ -5,9 +5,15 @@ const optionsHelper = require('../app/scripts/lib/optionsHelper')
 
 describe('Loading Options', ()=>{
     beforeAll(()=>{
-        global.chrome = chrome;
-        chrome.storage.sync.get.yields(testFixtures.settings)
+        global.chrome = chrome
     })
+
+    beforeEach(()=>{
+        chrome.storage.sync.get.reset()
+        chrome.storage.sync.get.yields(testFixtures.settings)
+        chrome.runtime.lastError = null
+    })
+
     it('will retrieve my settings', async ()=>{
         expect(chrome.storage.sync.get.notCalled).toBe(true)
         const doc = new DOMParser().parseFromString(testFixtures.pages.options, 'text/html')
@@ -22,8 +28,15 @@ describe('Loading Options', ()=>{
 describe('Saving Options', ()=>{
     beforeAll(()=>{
         global.chrome = chrome;
-        chrome.storage.sync.set.callsArg(1)
         jest.useFakeTimers()
+    })
+
+    beforeEach(()=>{
+        chrome.storage.sync.set.reset()
+        chrome.storage.sync.set.callsArg(1)
+        chrome.permissions.request.reset()
+        chrome.permissions.request.callsArgWith(1, true)
+        chrome.runtime.lastError = null
     })
 
     afterAll(()=>{
@@ -33,10 +46,45 @@ describe('Saving Options', ()=>{
     it('will save my settings', async ()=>{
         expect(chrome.storage.sync.set.notCalled).toBe(true)
         const doc = new DOMParser().parseFromString(testFixtures.pages.options, 'text/html')
+        doc.getElementById('jiraURL').value = 'https://jira.example.net'
         optionsHelper.saveOptions(doc)
-        expect(chrome.storage.sync.set.calledOnce).toBe(true)
         expect(doc.getElementById('saved').textContent).toBe('Options saved.')
+        expect(chrome.storage.sync.set.calledOnce).toBe(true)
         jest.runAllTimers()
         expect(doc.getElementById('saved').textContent).toBe('')
+    })
+
+    it('will not save settings with an invalid Jira URL', async ()=>{
+        expect(chrome.storage.sync.set.notCalled).toBe(true)
+        const doc = new DOMParser().parseFromString(testFixtures.pages.options, 'text/html')
+        doc.getElementById('jiraURL').value = 'potato'
+        optionsHelper.saveOptions(doc)
+        expect(doc.getElementById('saved').textContent).toBe('Invalid Jira URL')
+        expect(chrome.storage.sync.set.notCalled).toBe(true)
+        jest.runAllTimers()
+        expect(doc.getElementById('saved').textContent).toBe('')
+    })
+
+    it('will prompt for new permissions when a new Jira URL', async () =>{
+        expect(chrome.permissions.request.notCalled).toBe(true)
+        const doc = new DOMParser().parseFromString(testFixtures.pages.options, 'text/html')
+        doc.getElementById('jiraURL').value = 'https://jira.example.net'
+        optionsHelper.saveOptions(doc)
+        expect(chrome.permissions.request.calledOnce).toBe(true)
+    })
+
+    it('will log to console when new permissions are rejected', async () =>{
+        const originalConsoleLog = global.console.log
+        global.console.log = jest.fn()
+
+        chrome.permissions.request.callsArgWith(1, false)
+        const doc = new DOMParser().parseFromString(testFixtures.pages.options, 'text/html')
+        doc.getElementById('jiraURL').value = 'https://jira.example.net'
+        optionsHelper.saveOptions(doc)
+        expect(chrome.permissions.request.calledOnce).toBe(true)
+        expect(global.console.log).toHaveBeenCalledWith('Failed to get permission to use https://jira.example.net/* - maybe the user rejected it?')
+
+        global.console.log = originalConsoleLog
+
     })
 })
