@@ -172,6 +172,7 @@ class Tempo {
             })
             .catch(e => {
                 switch (e.status) {
+                    case 401:
                     case 403:
                         return Promise.reject(new TempoError('Not authorised with Jira'))
                     case 404:
