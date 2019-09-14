@@ -29,34 +29,26 @@ class Tempo {
     }
 
     fetchWorklogTotal() {
-        const fetchWorklogDataFromTempo = () => {
-            const payload = `{"worker":["${this.settings.username}"], "from": "${this.todayString}", "to": "${this.todayString}"}`
-            return this._makeRequest('POST', this.worklogsUrl, payload)
-                .catch(err => {
-                    let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch previous worklogs from Tempo')
-                    return Promise.reject(thisErr)
-                })
-        }
-
-        return fetchWorklogDataFromTempo()
+        const payload = `{"worker":["${this.settings.username}"], "from": "${this.todayString}", "to": "${this.todayString}"}`
+        return this._makeRequest('POST', this.worklogsUrl, payload)
             .then((worklogs) => {
                 return Promise.resolve(this._sumWorklogs(worklogs))
+            })
+            .catch(err => {
+                let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch previous worklogs from Tempo')
+                return Promise.reject(thisErr)
             })
     }
 
     fetchFutureWorklogTotal() {
-        const fetchFutureWorklogDataFromTempo = () => {
-            const payload = `{"worker":["${this.settings.username}"], "from": "${this.tomorrowString}", "to": "${this.thirtyDaysFromNowString}"}`
-            return this._makeRequest('POST', this.worklogsUrl, payload)
-                .catch(err => {
-                    let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch future worklogs from Tempo')
-                    return Promise.reject(thisErr)
-                })
-        }
-
-        return fetchFutureWorklogDataFromTempo()
+        const payload = `{"worker":["${this.settings.username}"], "from": "${this.tomorrowString}", "to": "${this.thirtyDaysFromNowString}"}`
+        return this._makeRequest('POST', this.worklogsUrl, payload)
             .then((worklogs) => {
                 return Promise.resolve(this._sumWorklogs(worklogs))
+            })
+            .catch(err => {
+                let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch future worklogs from Tempo')
+                return Promise.reject(thisErr)
             })
     }
 
@@ -79,12 +71,10 @@ class Tempo {
         return this._getWorkingDayFromUserSchedule()
             .then(workingDay => {
                 this.workingDay = workingDay
-                console.log(`Working day: ${workingDay}`)
                 return fetchPeriodDataFromTempo()
             })
             .then(periodData => {
                 let startingTotal = sumPeriodFlex(periodData)
-                console.log(`Starting Total: ${startingTotal}`)
                 if (!this.workingDay) return Promise.resolve(startingTotal)
 
                 const workingDayInSeconds = this.settings.hoursPerDay * 60 * 60
@@ -174,13 +164,13 @@ class Tempo {
                 switch (e.status) {
                     case 401:
                     case 403:
-                        return Promise.reject(new TempoError('Not authorised with Jira'))
+                        throw new TempoError('Not authorised with Jira')
                     case 404:
-                        return Promise.reject(new TempoError('Jira not found'))
+                        throw new TempoError('Jira not found')
                     case 0:
-                        return Promise.reject(new TempoError('Jira couldn\'t be contacted'))
+                        throw new TempoError('Jira couldn\'t be contacted')
                     default:
-                        return Promise.reject(e)
+                        throw e
                 }
             })
     }
