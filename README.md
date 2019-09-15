@@ -1,5 +1,6 @@
 # TempoFlex
 
+[![CircleCI](https://circleci.com/gh/Fishbowler/tempoflex-chrome-extension.svg?style=svg)](https://circleci.com/gh/Fishbowler/tempoflex-chrome-extension)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/Fishbowler/tempoflex-chrome-extension.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Fishbowler/tempoflex-chrome-extension/alerts/)
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/Fishbowler/tempoflex-chrome-extension.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Fishbowler/tempoflex-chrome-extension/context:javascript)
 [![Coverage Status](https://coveralls.io/repos/github/Fishbowler/tempoflex-chrome-extension/badge.svg?branch=master)](https://coveralls.io/github/Fishbowler/tempoflex-chrome-extension?branch=master)
