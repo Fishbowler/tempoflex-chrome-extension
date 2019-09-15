@@ -75,6 +75,7 @@ class Tempo {
             })
             .then(periodData => {
                 let startingTotal = sumPeriodFlex(periodData)
+                if (isNaN(startingTotal)) return Promise.reject(new TempoError('Unexpected period data returned from Jira'))
                 if (!this.workingDay) return Promise.resolve(startingTotal)
 
                 const workingDayInSeconds = this.settings.hoursPerDay * 60 * 60
@@ -131,7 +132,12 @@ class Tempo {
                 xhr.setRequestHeader('Content-Type', 'application/json')
                 xhr.onload = function () {
                     if (this.status >= 200 && this.status < 300) {
-                        resolve(JSON.parse(xhr.responseText))
+                        try {
+                            resolve(JSON.parse(xhr.responseText))
+                        } catch(e) {
+                            reject('Unexpected content from Tempo')
+                        }
+                        
                     } else {
                         reject({
                             status: this.status,

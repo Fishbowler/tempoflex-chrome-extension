@@ -300,6 +300,50 @@ describe('getFlex', ()=>{
         }
     })
 
+    it('will fail gracefully when Jira returns unexpected body content in Period request', async ()=>{
+        expect.assertions(1)
+        timekeeper.freeze(testFixtures.freezeTimeJan3rd)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.userScheduleUrlJan3rd)
+            .reply(200, testFixtures.userSchedules.workingDay)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.periodsUrl)
+            .reply(200, testFixtures.periods.onePeriodUnexpected) //Returns strings rather than numbers
+        nock(testFixtures.settings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-03', to:'2019-01-03'})
+            .reply(200, [])
+        nock(testFixtures.settings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-04', to:'2019-02-02'})
+            .reply(200, [])
+        try {
+            const flex = await popupUtils.getFlex()
+        } catch(e){
+            return expect(e.message).toEqual('Unexpected period data returned from Jira')
+        }
+    })
+
+    it('will fail gracefully when Jira returns unexpected body content in Period request', async ()=>{
+        expect.assertions(1)
+        timekeeper.freeze(testFixtures.freezeTimeJan3rd)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.userScheduleUrlJan3rd)
+            .reply(200, testFixtures.userSchedules.workingDay)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .get(testFixtures.periodsUrl)
+            .reply(200, testFixtures.periods.onePeriodEmpty)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-03', to:'2019-01-03'})
+            .reply(200, testFixtures.unexpected.emoji)
+        nock(testFixtures.settings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [testFixtures.settings.username], from:'2019-01-04', to:'2019-02-02'})
+            .reply(200, [])
+        try {
+            const flex = await popupUtils.getFlex()
+        } catch(e){
+            return expect(e.message).toEqual('Failed to fetch previous worklogs from Tempo')
+        }
+    })
+
     it('will fail gracefully when Chrome settings are empty', async ()=>{
         chrome.storage.sync.get.yields(null)
         try {
