@@ -25,11 +25,17 @@ module.exports = {
         twoPeriodsBalanced: [{workedSeconds: 1000, requiredSecondsRelativeToday: 1000},
                             {workedSeconds: 1000, requiredSecondsRelativeToday: 1000}],
         onePeriod1DayAhead: [{workedSeconds: 2*8*60*60, requiredSecondsRelativeToday: 8*60*60}],
-        onePeriod2222Behind: [{workedSeconds: (3*8*60*60)-64922, requiredSecondsRelativeToday: 3*8*60*60}]
+        onePeriod2222Behind: [{workedSeconds: (3*8*60*60)-64922, requiredSecondsRelativeToday: 3*8*60*60}],
+        onePeriodEmpty: [{workedSeconds: 0, requiredSecondsRelativeToday: 0}],
+        onePeriodUnexpected: [{workedSeconds: 'zero', requiredSecondsRelativeToday: 'zero'}]
     },
     userSchedules: {
         workingDay: {"numberOfWorkingDays":1,"requiredSeconds":27000,"days":[{"date":"2019-01-03","requiredSeconds":27000,"type":"WORKING_DAY"}]},
         nonWorkingDay: {"numberOfWorkingDays":0,"requiredSeconds":0,"days":[{"date":"2019-01-01","requiredSeconds":0,"type":"NON_WORKING_DAY"}]}
+    },
+    unexpected: {
+      emoji: '🥔',
+      potato: 'potato' //YAGNI?
     },
     pages: {
         options: `<!doctype html>
