@@ -2,7 +2,6 @@
 
 const chromeUtils = require('./chromeUtils')
 const stringUtils = require('./stringUtils')
-const TempoError = require('./errorUtils').TempoError
 const Tempo = require('./tempo')
 
 const flexCalculator = (settings) => {
