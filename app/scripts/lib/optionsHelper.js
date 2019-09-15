@@ -1,12 +1,12 @@
-
 const defaults = require('./defaults.js')
+const chromeUtils = require('./chromeUtils')
 
 module.exports = {
-    saveOptions: (_document) => {
+    saveOptions: async (_document) => {
         const updateStatus = (status) => {
             var statusElement = _document.getElementById('saved');
             statusElement.textContent = status
-            setTimeout(function() {
+            setTimeout(function () {
                 statusElement.textContent = '';
             }, 750);
         }
@@ -14,27 +14,30 @@ module.exports = {
         const options = {
             jiraBaseUrl: _document.getElementById('jiraURL').value,
             username: _document.getElementById('username').value,
-            hoursPerDay: _document.getElementById('hoursPerDay').value
+            hoursPerDay: _document.getElementById('hoursPerDay').value,
+            useStartDate: _document.getElementById('useStartDate').checked,
+            startDate: _document.getElementById('startDate').value
         }
 
         let jiraUrl
-        try{
+        try {
             jiraUrl = new URL('/', options.jiraBaseUrl)
-        } catch (e){
+        } catch (e) {
             updateStatus('Invalid Jira URL')
             return
         }
-    
+
         const optionsToSave = Object.assign({}, defaults, options)
-    
-        chrome.storage.sync.set(optionsToSave, ()=>{
-            updateStatus('Options saved.')
-        })
-        
+
+        await chromeUtils.setSettings(optionsToSave)
+        updateStatus('Options saved.')
+
         jiraUrl = new URL('/*', jiraUrl)
-        const newJiraURLPermission = {origins: [jiraUrl.toString()]}
-        chrome.permissions.request(newJiraURLPermission, (result)=>{
-            if(result){
+        const newJiraURLPermission = {
+            origins: [jiraUrl.toString()]
+        }
+        chrome.permissions.request(newJiraURLPermission, (result) => {
+            if (result) {
                 console.log('User granted permission to use ' + jiraUrl.toString())
                 return
             }
@@ -42,14 +45,13 @@ module.exports = {
             console.log(chrome.runtime.lastError)
         })
     },
-    
-    restoreOptions: (_document) => {
-        const keys = Object.keys(defaults)
-        chrome.storage.sync.get(keys, (options)=>{
-            const displayableOptions = Object.assign({}, defaults, options)
-            _document.getElementById('jiraURL').value = displayableOptions.jiraBaseUrl,
-            _document.getElementById('username').value = displayableOptions.username
-            _document.getElementById('hoursPerDay').value = displayableOptions.hoursPerDay
-        })
+
+    restoreOptions: async (_document) => {
+        let settings = await chromeUtils.getSettings()
+        _document.getElementById('jiraURL').value = settings.jiraBaseUrl,
+        _document.getElementById('username').value = settings.username
+        _document.getElementById('hoursPerDay').value = settings.hoursPerDay
+        _document.getElementById('useStartDate').checked = settings.useStartDate
+        _document.getElementById('startDate').value = settings.startDate
     }
 }
