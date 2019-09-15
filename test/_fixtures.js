@@ -3,7 +3,9 @@ module.exports = {
         jiraBaseUrl: 'https://jira.testcorp.net',
         periods: 1,
         username: 'a.smith',
-        hoursPerDay: 8
+        hoursPerDay: 8,
+        useStartDate: false,
+        startDate: '01/01/2000'
     },
     periodsUrl: '/rest/tempo-timesheets/4/timesheet-approval/approval-statuses/?userKey=a.smith&numberOfPeriods=1',
     worklogSearchUrl: '/rest/tempo-timesheets/4/worklogs/search',
@@ -59,6 +61,17 @@ module.exports = {
             <div id="hpdWrapper">
               <div>Hours per day: </div>
               <input type="text" id="hoursPerDay"></input><br><br>
+            </div>
+
+            <div id="startDateWrapper">
+              <div>Specify start date? <br />
+                  <span style="font-style: italic;">(This is required if you began employment this calendar year)</span>
+              </div>
+              <input type="checkbox" id="useStartDate" onchange="showhideStartDate()"><br />
+              <div id="startDateShowHideWrapper" style="display:none">
+                  <input type="text" id="startDate"></input><br>
+              </div>
+              <br>
             </div>
         
             <button id="save">Save</button>
