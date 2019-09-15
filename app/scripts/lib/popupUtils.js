@@ -18,8 +18,7 @@ const flexCalculator = (settings) => {
     return periodData - futureAdjustment
   })
   .catch(err => {
-    let thisErr = err instanceof TempoError ? err : new TempoError('Failed to get data from Tempo')
-    return Promise.reject(thisErr)
+    return Promise.reject(err)
   })
 }
 
@@ -35,8 +34,7 @@ const getFlex = () => {
       return stringUtils.convertFlexToString(flex, settings.hoursPerDay)
     })
     .catch(err => {
-      let thisErr = err instanceof Error ? err : new Error(err)
-      return Promise.reject(thisErr)
+      return Promise.reject(err)
     })
 }
 
