@@ -1,5 +1,9 @@
 # TempoFlex
 
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/Fishbowler/tempoflex-chrome-extension.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Fishbowler/tempoflex-chrome-extension/alerts/)
+[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/Fishbowler/tempoflex-chrome-extension.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Fishbowler/tempoflex-chrome-extension/context:javascript)
+[![Coverage Status](https://coveralls.io/repos/github/Fishbowler/tempoflex-chrome-extension/badge.svg?branch=master)](https://coveralls.io/github/Fishbowler/tempoflex-chrome-extension?branch=master)
+
 Chrome extension. Get the time spent over/under what Tempo says you should have worked, for flexible working environments.
 
 ## Developing
