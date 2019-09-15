@@ -6,11 +6,10 @@ module.exports = {
                 await chromeUtils.setSettings()
             }
             if (details.reason == 'update') {
-                await chromeUtils.getSettings()
-                    .then(settings => {
-                        chromeUtils.setSettings(settings)
-                    })
+                let settings = await chromeUtils.getSettings()
+                await chromeUtils.setSettings(settings)
             }
+            return
         })
     }
 }
