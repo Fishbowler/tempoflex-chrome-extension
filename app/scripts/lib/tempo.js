@@ -26,6 +26,7 @@ class Tempo {
         this._generatePeriodsURL()
         this._generateWorklogsURL()
         this._generateUserScheduleURL(this.todayString, this.todayString)
+        if(this.settings.useStartDate) this._generatePreStartDateUserScheduleURL(this.settings.startDate, this.todayString)
     }
 
     fetchWorklogTotal() {
@@ -68,27 +69,53 @@ class Tempo {
             return periodData.reduce(flexAccumulator, 0)
         }
 
+        const getAdjustmentForToday = () => {
+            if (!this.workingDay) return Promise.resolve(0)
+
+            const workingDayInSeconds = this.settings.hoursPerDay * 60 * 60
+            return this.fetchWorklogTotal()
+            .then(totalSecondsToday => {
+                let adjustment = workingDayInSeconds //Credit back tempo's one-day debt at the beginning of the day
+                if (totalSecondsToday >= workingDayInSeconds) {
+                    adjustment -= workingDayInSeconds //If you've worked over a full working day, credit that time back
+                } else {
+                    adjustment -= totalSecondsToday //...else don't include any work done today as additional flex
+                }
+                return adjustment
+            })
+        }
+
+        const getAdjustmentForStartDate = () => {
+            if(!this.settings.useStartDate) return Promise.resolve(0)
+
+            return this._makeRequest('GET', this.userSchedulePreStartDateUrl)
+            .then(scheduleData => {
+                //TODO: Validate that API response, even if it's the second time?
+                let scheduledSeconds = scheduleData.requiredSeconds
+                scheduledSeconds -= scheduleData.days.pop().requiredSeconds //Don't adjust for the last day, because that was their first day!
+                return Promise.resolve(scheduledSeconds * -1)
+            })
+        }
+
+        let runningFlexTotal = 0
+
         return this._getWorkingDayFromUserSchedule()
             .then(workingDay => {
                 this.workingDay = workingDay
                 return fetchPeriodDataFromTempo()
             })
             .then(periodData => {
-                let startingTotal = sumPeriodFlex(periodData)
-                if (isNaN(startingTotal)) return Promise.reject(new TempoError('Unexpected period data returned from Jira'))
-                if (!this.workingDay) return Promise.resolve(startingTotal)
-
-                const workingDayInSeconds = this.settings.hoursPerDay * 60 * 60
-                return this.fetchWorklogTotal()
-                    .then(totalSecondsToday => {
-                        let fudge = workingDayInSeconds //Credit back tempo's one-day debt at the beginning of the day
-                        if (totalSecondsToday >= workingDayInSeconds) {
-                            fudge -= workingDayInSeconds //If you've worked over a full working day, credit that time back
-                        } else {
-                            fudge -= totalSecondsToday //...else don't include any work done today as additional flex
-                        }
-                        return Promise.resolve(startingTotal + fudge)
-                    })
+                runningFlexTotal = sumPeriodFlex(periodData)
+                if (isNaN(runningFlexTotal)) return Promise.reject(new TempoError('Unexpected period data returned from Jira'))
+                return getAdjustmentForToday()
+            })
+            .then(adjustment => {
+                runningFlexTotal += adjustment
+                return getAdjustmentForStartDate()
+            })
+            .then(adjustment => {
+                runningFlexTotal += adjustment
+                return Promise.resolve(runningFlexTotal)
             })
     }
 
@@ -112,6 +139,11 @@ class Tempo {
     _generateUserScheduleURL(from, to) {
         const relativePath = `/rest/tempo-core/1/user/schedule/?user=${this.settings.username}&from=${from}&to=${to}`
         this.userScheduleUrl = new URL(relativePath, this.settings.jiraBaseUrl).toString()
+    }
+
+    _generatePreStartDateUserScheduleURL(from, to) {
+        const relativePath = `/rest/tempo-core/1/user/schedule/?user=${this.settings.username}&from=${from}&to=${to}`
+        this.userSchedulePreStartDateUrl = new URL(relativePath, this.settings.jiraBaseUrl).toString()
     }
 
     _getWorkingDayFromUserSchedule() {
