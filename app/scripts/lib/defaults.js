@@ -4,5 +4,5 @@ module.exports = {
     username: 'jbloggs',
     hoursPerDay: 7.5,
     useStartDate: false,
-    startDate: '01/01/2000'
+    startDate: '2000-01-01'
 }
