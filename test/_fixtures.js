@@ -1,11 +1,13 @@
 module.exports = {
     settings: {
+      default: {
         jiraBaseUrl: 'https://jira.testcorp.net',
         periods: 1,
         username: 'a.smith',
         hoursPerDay: 8,
         useStartDate: false,
         startDate: '2000-01-01'
+      }
     },
     periodsUrl: '/rest/tempo-timesheets/4/timesheet-approval/approval-statuses/?userKey=a.smith&numberOfPeriods=1',
     worklogSearchUrl: '/rest/tempo-timesheets/4/worklogs/search',
