@@ -22,7 +22,7 @@
     "humanize-duration": "^3.20.1",
     "jest": "^24.9.0",
     "merge-stream": "^2.0.0",
-    "nock": "^11.3.4",
+    "nock": "^11.7.0",
     "sinon-chrome": "^3.0.1",
     "timekeeper": "^2.2.0",
     "vinyl-source-stream": "^2.0.0",
