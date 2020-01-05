@@ -10,7 +10,7 @@ describe('Loading Options', ()=>{
 
     beforeEach(()=>{
         chrome.storage.sync.get.reset()
-        chrome.storage.sync.get.yields(testfixtures.settings.default)
+        chrome.storage.sync.get.yields(testFixtures.settings.default)
         chrome.runtime.lastError = null
     })
 
@@ -19,11 +19,11 @@ describe('Loading Options', ()=>{
         const doc = new DOMParser().parseFromString(testFixtures.pages.options, 'text/html')
         await optionsHelper.restoreOptions(doc)
         expect(chrome.storage.sync.get.calledOnce).toBe(true)
-        expect(doc.getElementById('jiraURL').value).toBe(testfixtures.settings.default.jiraBaseUrl)
-        expect(doc.getElementById('username').value).toBe(testfixtures.settings.default.username)
-        expect(doc.getElementById('hoursPerDay').value).toBe(testfixtures.settings.default.hoursPerDay.toString())
-        expect(doc.getElementById('useStartDate').checked).toBe(testfixtures.settings.default.useStartDate)
-        expect(doc.getElementById('startDate').value).toBe(testfixtures.settings.default.startDate.toString())
+        expect(doc.getElementById('jiraURL').value).toBe(testFixtures.settings.default.jiraBaseUrl)
+        expect(doc.getElementById('username').value).toBe(testFixtures.settings.default.username)
+        expect(doc.getElementById('hoursPerDay').value).toBe(testFixtures.settings.default.hoursPerDay.toString())
+        expect(doc.getElementById('useStartDate').checked).toBe(testFixtures.settings.default.useStartDate)
+        expect(doc.getElementById('startDate').value).toBe(testFixtures.settings.default.startDate.toString())
     })
 })
 

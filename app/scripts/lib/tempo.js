@@ -26,7 +26,7 @@ class Tempo {
         this._generatePeriodsURL()
         this._generateWorklogsURL()
         this._generateUserScheduleURL(this.todayString, this.todayString)
-        if(this.settings.useStartDate) this._generatePreStartDateUserScheduleURL(this.settings.startDate, this.todayString)
+        if(this.settings.useStartDate) this._generatePreStartDateUserScheduleURL(this.todayString)
     }
 
     fetchWorklogTotal() {
@@ -93,7 +93,7 @@ class Tempo {
                 //TODO: Validate that API response, even if it's the second time?
                 let scheduledSeconds = scheduleData.requiredSeconds
                 scheduledSeconds -= scheduleData.days.pop().requiredSeconds //Don't adjust for the last day, because that was their first day!
-                return Promise.resolve(scheduledSeconds * -1)
+                return Promise.resolve(scheduledSeconds)
             })
         }
 
@@ -141,7 +141,8 @@ class Tempo {
         this.userScheduleUrl = new URL(relativePath, this.settings.jiraBaseUrl).toString()
     }
 
-    _generatePreStartDateUserScheduleURL(from, to) {
+    _generatePreStartDateUserScheduleURL(to) {
+        const from = new Date(new Date().getFullYear(), 0, 1).toISOString().substring(0, 10)
         const relativePath = `/rest/tempo-core/1/user/schedule/?user=${this.settings.username}&from=${from}&to=${to}`
         this.userSchedulePreStartDateUrl = new URL(relativePath, this.settings.jiraBaseUrl).toString()
     }
