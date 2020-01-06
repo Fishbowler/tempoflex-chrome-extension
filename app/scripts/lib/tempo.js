@@ -11,15 +11,15 @@ class Tempo {
         const formatDateStringForTempo = (dateToFormat) => {
             return dateToFormat.toISOString().substring(0, 10)
         }
-        this.todayString = formatDateStringForTempo(new Date())
+        let today = new Date()
+        this.todayString = formatDateStringForTempo(today)
 
         let tomorrow = new Date()
         tomorrow.setDate(tomorrow.getDate() + 1)
         this.tomorrowString = formatDateStringForTempo(tomorrow)
 
-        let thirtyDaysFromNow = new Date()
-        thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30)
-        this.thirtyDaysFromNowString = formatDateStringForTempo(thirtyDaysFromNow)
+        let lastDayOfPeriod = new Date(today.getFullYear(), today.getMonth()+1, 0);
+        this.lastDayOfPeriodString = formatDateStringForTempo(lastDayOfPeriod)
     }
 
     generateUrls() {
@@ -42,7 +42,7 @@ class Tempo {
     }
 
     fetchFutureWorklogTotal() {
-        const payload = `{"worker":["${this.settings.username}"], "from": "${this.tomorrowString}", "to": "${this.thirtyDaysFromNowString}"}`
+        const payload = `{"worker":["${this.settings.username}"], "from": "${this.tomorrowString}", "to": "${this.lastDayOfPeriodString}"}`
         return this._makeRequest('POST', this.worklogsUrl, payload)
             .then((worklogs) => {
                 return Promise.resolve(this._sumWorklogs(worklogs))
