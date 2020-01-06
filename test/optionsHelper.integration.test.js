@@ -10,18 +10,20 @@ describe('Loading Options', ()=>{
 
     beforeEach(()=>{
         chrome.storage.sync.get.reset()
-        chrome.storage.sync.get.yields(testFixtures.settings)
+        chrome.storage.sync.get.yields(testFixtures.settings.default)
         chrome.runtime.lastError = null
     })
 
     it('will retrieve my settings', async ()=>{
         expect(chrome.storage.sync.get.notCalled).toBe(true)
         const doc = new DOMParser().parseFromString(testFixtures.pages.options, 'text/html')
-        optionsHelper.restoreOptions(doc)
+        await optionsHelper.restoreOptions(doc)
         expect(chrome.storage.sync.get.calledOnce).toBe(true)
-        expect(doc.getElementById('jiraURL').value).toBe(testFixtures.settings.jiraBaseUrl)
-        expect(doc.getElementById('username').value).toBe(testFixtures.settings.username)
-        expect(doc.getElementById('hoursPerDay').value).toBe(testFixtures.settings.hoursPerDay.toString())
+        expect(doc.getElementById('jiraURL').value).toBe(testFixtures.settings.default.jiraBaseUrl)
+        expect(doc.getElementById('username').value).toBe(testFixtures.settings.default.username)
+        expect(doc.getElementById('hoursPerDay').value).toBe(testFixtures.settings.default.hoursPerDay.toString())
+        expect(doc.getElementById('useStartDate').checked).toBe(testFixtures.settings.default.useStartDate)
+        expect(doc.getElementById('startDate').value).toBe(testFixtures.settings.default.startDate.toString())
     })
 })
 
@@ -47,7 +49,7 @@ describe('Saving Options', ()=>{
         expect(chrome.storage.sync.set.notCalled).toBe(true)
         const doc = new DOMParser().parseFromString(testFixtures.pages.options, 'text/html')
         doc.getElementById('jiraURL').value = 'https://jira.example.net'
-        optionsHelper.saveOptions(doc)
+        await optionsHelper.saveOptions(doc)
         expect(doc.getElementById('saved').textContent).toBe('Options saved.')
         expect(chrome.storage.sync.set.calledOnce).toBe(true)
         jest.runAllTimers()
@@ -58,7 +60,7 @@ describe('Saving Options', ()=>{
         expect(chrome.storage.sync.set.notCalled).toBe(true)
         const doc = new DOMParser().parseFromString(testFixtures.pages.options, 'text/html')
         doc.getElementById('jiraURL').value = 'potato'
-        optionsHelper.saveOptions(doc)
+        await optionsHelper.saveOptions(doc)
         expect(doc.getElementById('saved').textContent).toBe('Invalid Jira URL')
         expect(chrome.storage.sync.set.notCalled).toBe(true)
         jest.runAllTimers()
@@ -69,7 +71,7 @@ describe('Saving Options', ()=>{
         expect(chrome.permissions.request.notCalled).toBe(true)
         const doc = new DOMParser().parseFromString(testFixtures.pages.options, 'text/html')
         doc.getElementById('jiraURL').value = 'https://jira.example.net'
-        optionsHelper.saveOptions(doc)
+        await optionsHelper.saveOptions(doc)
         expect(chrome.permissions.request.calledOnce).toBe(true)
     })
 
@@ -80,7 +82,7 @@ describe('Saving Options', ()=>{
         chrome.permissions.request.callsArgWith(1, false)
         const doc = new DOMParser().parseFromString(testFixtures.pages.options, 'text/html')
         doc.getElementById('jiraURL').value = 'https://jira.example.net'
-        optionsHelper.saveOptions(doc)
+        await optionsHelper.saveOptions(doc)
         expect(chrome.permissions.request.calledOnce).toBe(true)
         expect(global.console.log).toHaveBeenCalledWith('Failed to get permission to use https://jira.example.net/* - maybe the user rejected it?')
 

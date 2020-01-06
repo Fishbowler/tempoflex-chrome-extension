@@ -21,14 +21,9 @@ const flexCalculator = (settings) => {
   })
 }
 
-const getFlex = () => {
-  let settings = {}
-
-  return chromeUtils.getSettings()
-    .then(settingsFromStorage => {
-      settings = settingsFromStorage
-      return flexCalculator(settings)
-    })
+const getFlex = async () => {
+  let settings = await chromeUtils.getSettings()
+  return flexCalculator(settings)
     .then(flex => {
       return stringUtils.convertFlexToString(flex, settings.hoursPerDay)
     })

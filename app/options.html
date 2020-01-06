@@ -1,29 +1,55 @@
 <!doctype html>
 <html>
-  <head>
+
+<head>
     <!-- build:css styles/main.css -->
     <link href="styles/main.css" rel="stylesheet">
     <!-- endbuild -->
-  </head>
-  <body>
+</head>
+
+<body>
+    <script>
+        function showhideStartDate() {
+            var checkBox = document.getElementById("showStartDate");
+            var div = document.getElementById("startDateShowHideWrapper");
+            if (checkBox.checked == true) {
+                div.style.display = "block";
+            } else {
+                div.style.display = "none";
+            }
+        }
+    </script>
     <div id="jiraURLWrapper">
-      <div>Jira root URL: </div>
-      <input type="text" id="jiraURL"></input><br><br>
+        <div>Jira root URL: </div>
+        <input type="text" id="jiraURL"></input><br><br>
     </div>
 
     <div id="usernameWrapper">
-      <div>Jira username: </div>
-      <input type="text" id="username"></input><br><br>
+        <div>Jira username: </div>
+        <input type="text" id="username"></input><br><br>
     </div>
 
     <div id="hpdWrapper">
-      <div>Hours per day: </div>
-      <input type="text" id="hoursPerDay"></input><br><br>
+        <div>Hours per day: </div>
+        <input type="text" id="hoursPerDay"></input><br><br>
+    </div>
+
+    <div id="startDateWrapper">
+        <div>Specify start date? <br />
+            <span style="font-style: italic;">(This is required if you began employment this calendar year)</span>
+        </div>
+        <input type="checkbox" id="useStartDate" onchange="showhideStartDate()"><br />
+        <div id="startDateShowHideWrapper" style="display:none">
+            <span>Format: yyyy-MM-dd, e.g. 2012-12-31</span><br />
+            <input type="text" id="startDate"></input><br />
+        </div>
+        <br>
     </div>
 
     <button id="save">Save</button>
     <div id="saved"></div>
 
     <script src="scripts/options.js"></script>
-  </body>
+</body>
+
 </html>
