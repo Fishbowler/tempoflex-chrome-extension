@@ -1,11 +1,12 @@
 {
   "name": "__MSG_appName__",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "manifest_version": 2,
   "description": "__MSG_appDescription__",
   "icons": {
     "16": "images/man-flexing-legs_16.png",
     "32": "images/man-flexing-legs_32.png",
+    "48": "images/man-flexing-legs_48.png",
     "128": "images/man-flexing-legs_128.png"
   },
   "default_locale": "en",
@@ -29,6 +30,7 @@
     "default_icon": {
       "16": "images/man-flexing-legs_16.png",
       "32": "images/man-flexing-legs_32.png",
+      "48": "images/man-flexing-legs_48.png",
       "128": "images/man-flexing-legs_128.png"
     },
     "default_title": "TempoFlex",

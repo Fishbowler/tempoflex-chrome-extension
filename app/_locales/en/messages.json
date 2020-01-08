@@ -4,7 +4,7 @@
     "description": "The name of the application"
   },
   "appDescription": {
-    "message": "Get the time spent over/under what Tempo says you should have worked",
+    "message": "Get a current balance on your flexible working hours - time spent over/under what Tempo says you should have worked",
     "description": "The description of the application"
   }
 }
