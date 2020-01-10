@@ -4,6 +4,7 @@ module.exports = {
         chrome.runtime.onInstalled.addListener(async (details) => {
             if (details.reason == 'install') {
                 await chromeUtils.setSettings()
+                chrome.runtime.openOptionsPage();
             }
             if (details.reason == 'update') {
                 let settings = await chromeUtils.getSettings()
