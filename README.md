@@ -7,20 +7,40 @@
 
 Chrome extension. Get the time spent over/under what Tempo says you should have worked, for flexible working environments.
 
+See it on the [Chrome Web Store](https://chrome.google.com/webstore/detail/tempoflex/ldinkknlmjkoigpniidlffboenkecgbp)
+
+## Why this exists
+
+Short version: I needed this.
+
+Long version: Many software houses use Jira. Many people use Tempo in Jira to track time, especially if it's a consultancy and you need to bill that time to someone! Some workplaces have flexible working arrangements. If you have flexible working hours, TempoFlex can let you know how much time you have worked above/below what you should have worked (according to your Tempo Administrator).
+
+You _should_ be able to get this through the Tempo UI, but there's a few problems. For starters, before you started work today you were already behind by the number of hours you should work by the end of the day. Next, if you book time in the future (e.g. you have holiday tomorrow and want your timesheet up to date for reporting), then Tempo classes this as work done, and so you're reported as ahead, but that doesn't actually mean you can take the afternoon off. Tempo bundles everything into Periods, which means if you have a busy Jan 31st and work a couple of extra hours, Tempo shows you as "balanced" on Feb 1st (unless you dig into older periods which shows you were up on a previous period, but never reconciles).
+
 ## Developing
 
 Building the extension
 ```
 npm install
-gulp
+npm run build
 ```
 
 ## Installing
 
-* Build the extension (above), or download & unzip "TempoFlex-x.x.x.zip" from the [latest release](https://github.com/Fishbowler/tempoflex-chrome-extension/releases/latest)
+### From Chrome Web Store
+
+Visit https://chrome.google.com/webstore/detail/tempoflex/ldinkknlmjkoigpniidlffboenkecgbp
+
+### Development
+
+* Build the extension (above)
 * Visit chrome://extensions in Chrome
 * Enable "Developer Mode" (in the top right)
 * Click "Load unpacked" and navigate to the extension folder (that's the "dist" subfolder if you've built from source)
+
+### From a Github release
+
+As above, but download & unzip "TempoFlex-x.x.x.zip" from the [latest release](https://github.com/Fishbowler/tempoflex-chrome-extension/releases/latest)
 
 ## Usage
 
