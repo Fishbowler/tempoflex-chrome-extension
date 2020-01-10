@@ -7,7 +7,7 @@
 
 Chrome extension. Get the time spent over/under what Tempo says you should have worked, for flexible working environments.
 
-See it on the [Chrome Web Store](https://chrome.google.com/webstore/detail/tempoflex/ldinkknlmjkoigpniidlffboenkecgbp)
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/ldinkknlmjkoigpniidlffboenkecgbp)](https://chrome.google.com/webstore/detail/tempoflex/ldinkknlmjkoigpniidlffboenkecgbp)
 
 ## Why this exists
 
