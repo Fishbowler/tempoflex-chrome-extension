@@ -11,7 +11,8 @@ gulp.task('buildScripts', () => {
   const files = [
     'background.js',
     'popup.js',
-    'options.js'
+    'options.js',
+    'optionsPage.js'
   ];
 
   return merge(
