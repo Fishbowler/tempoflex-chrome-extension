@@ -26,7 +26,7 @@ class Tempo {
         this._generatePeriodsURL()
         this._generateWorklogsURL()
         this._generateUserScheduleURL(this.todayString, this.todayString)
-        if(this.settings.useStartDate) this._generatePreStartDateUserScheduleURL(this.todayString)
+        if(this.settings.useStartDate) this._generatePreStartDateUserScheduleURL(this.settings.startDate)
     }
 
     fetchWorklogTotal() {
