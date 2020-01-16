@@ -3,7 +3,26 @@ body {
 }
 
 .popup {
-  width: 120px
+  width: 180px;
+}
+
+.popup .popupTitleBanner {
+  margin-bottom: 12px;
+}
+
+.popup .popupTitleBanner .logo {
+  float: left;
+  margin-right: 6px;
+}
+
+.popup .popupTitleBanner .title {
+  display: inline;
+  margin-right: 6px;
+}
+
+.popup .popupTitleBanner .settings {
+  float: right;
+  margin-top: -1px;
 }
 
 .options {
