@@ -9,35 +9,36 @@
 </head>
 
 <body>
+    <div class="options">
+        <div id="jiraURLWrapper">
+            <div>Jira root URL: </div>
+            <input type="text" id="jiraURL"></input><br><br>
+        </div>
 
-    <div id="jiraURLWrapper">
-        <div>Jira root URL: </div>
-        <input type="text" id="jiraURL"></input><br><br>
-    </div>
+        <div id="usernameWrapper">
+            <div>Jira username: </div>
+            <input type="text" id="username"></input><br><br>
+        </div>
 
-    <div id="usernameWrapper">
-        <div>Jira username: </div>
-        <input type="text" id="username"></input><br><br>
-    </div>
+        <div id="hpdWrapper">
+            <div>Hours per day: </div>
+            <input type="text" id="hoursPerDay"></input><br><br>
+        </div>
 
-    <div id="hpdWrapper">
-        <div>Hours per day: </div>
-        <input type="text" id="hoursPerDay"></input><br><br>
-    </div>
-
-    <div id="startDateWrapper">
-        <div>Specify start date? <br />
-            <span style="font-style: italic;">(This is required if you began employment this calendar year)</span>
+        <div id="startDateWrapper">
+            <div>Specify start date? <br />
+                <span style="font-style: italic;">(This is required if you began employment this calendar year)</span>
         </div>
         <input type="checkbox" id="useStartDate"><br />
         <div id="startDateShowHideWrapper" style="display:none">
             <input type="date" id="startDate"></input><br />
         </div>
-        <br>
-    </div>
+            <br>
+        </div>
 
-    <button id="save">Save</button>
-    <div id="saved"></div>
+        <button id="save">Save</button>
+        <div id="saved"></div>
+    </div>
 
     <script src="scripts/options.js"></script>
 </body>

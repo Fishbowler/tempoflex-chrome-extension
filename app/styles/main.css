@@ -1,6 +1,13 @@
 body {
-  padding: 20px;
+  padding: 20px
+}
+
+.popup {
   width: 120px
+}
+
+.options {
+  width: 300px
 }
 
 span {
