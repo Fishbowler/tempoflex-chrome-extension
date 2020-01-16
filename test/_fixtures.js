@@ -85,7 +85,7 @@ module.exports = {
               </div>
               <input type="checkbox" id="useStartDate" onchange="showhideStartDate()"><br />
               <div id="startDateShowHideWrapper" style="display:none">
-                  <input type="text" id="startDate"></input><br>
+                  <input type="date" id="startDate"></input><br>
               </div>
               <br>
             </div>
