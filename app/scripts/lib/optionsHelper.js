@@ -53,5 +53,6 @@ module.exports = {
         _document.getElementById('hoursPerDay').value = settings.hoursPerDay
         _document.getElementById('useStartDate').checked = settings.useStartDate
         _document.getElementById('startDate').value = settings.startDate
+        _document.getElementById('startDate').min = new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().substring(0, 10)
     }
 }
