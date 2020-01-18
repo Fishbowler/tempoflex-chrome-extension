@@ -1,4 +1,5 @@
 const TempoError = require('./errorUtils').TempoError
+const dateUtils = require('./dateUtils')
 
 class Tempo {
     constructor(settings) {
@@ -8,18 +9,16 @@ class Tempo {
     }
 
     generateDateStrings() {
-        const formatDateStringForTempo = (dateToFormat) => {
-            return dateToFormat.toISOString().substring(0, 10)
-        }
+
         let today = new Date()
-        this.todayString = formatDateStringForTempo(today)
+        this.todayString = dateUtils.dateToYYYYMMDD(today)
 
         let tomorrow = new Date()
         tomorrow.setDate(tomorrow.getDate() + 1)
-        this.tomorrowString = formatDateStringForTempo(tomorrow)
+        this.tomorrowString = dateUtils.dateToYYYYMMDD(tomorrow)
 
         let lastDayOfPeriod = new Date(today.getFullYear(), today.getMonth()+1, 0);
-        this.lastDayOfPeriodString = formatDateStringForTempo(lastDayOfPeriod)
+        this.lastDayOfPeriodString = dateUtils.dateToYYYYMMDD(lastDayOfPeriod)
     }
 
     generateUrls() {
@@ -142,7 +141,7 @@ class Tempo {
     }
 
     _generatePreStartDateUserScheduleURL(to) {
-        const from = new Date(new Date().getFullYear(), 0, 1).toISOString().substring(0, 10)
+        const from = dateUtils.dateToYYYYMMDD(new Date(new Date().getFullYear(), 0, 1))
         const relativePath = `/rest/tempo-core/1/user/schedule/?user=${this.settings.username}&from=${from}&to=${to}`
         this.userSchedulePreStartDateUrl = new URL(relativePath, this.settings.jiraBaseUrl).toString()
     }
