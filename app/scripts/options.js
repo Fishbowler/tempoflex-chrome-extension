@@ -1,5 +1,19 @@
 'use strict';
 const {saveOptions,restoreOptions} = require('./lib/optionsHelper')
 
-document.addEventListener('DOMContentLoaded', function(){return restoreOptions(document)});
-document.getElementById('save').addEventListener('click', function(){return saveOptions(document)});
+window.addEventListener('load', function(){
+    var checkBox = document.getElementById("useStartDate");
+    function showHideStartDate(){
+        var div = document.getElementById("startDateShowHideWrapper");
+        if (checkBox.checked == true) {
+            div.style.display = "block";
+        } else {
+            div.style.display = "none";
+        }
+    }
+    checkBox.addEventListener('change', showHideStartDate);
+    restoreOptions(document)
+    .then(showHideStartDate)
+});
+
+document.getElementById('save').addEventListener('click', function(){saveOptions(document)});
