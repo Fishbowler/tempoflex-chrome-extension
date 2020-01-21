@@ -83,7 +83,7 @@ module.exports = {
               <div>Specify start date? <br />
                   <span style="font-style: italic;">(This is required if you began employment this calendar year)</span>
               </div>
-              <input type="checkbox" id="useStartDate" onchange="showhideStartDate()"><br />
+              <input type="checkbox" id="useStartDate"><br />
               <div id="startDateShowHideWrapper" style="display:none">
                   <input type="date" id="startDate"></input><br>
               </div>
