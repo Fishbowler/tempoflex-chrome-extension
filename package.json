@@ -20,7 +20,7 @@
     "gulp-clean-css": "^4.2.0",
     "gulp-zip": "^5.0.1",
     "humanize-duration": "^3.22.0",
-    "jest": "^24.9.0",
+    "jest": "^25.2.3",
     "merge-stream": "^2.0.0",
     "nock": "^11.7.2",
     "sinon-chrome": "^3.0.1",
