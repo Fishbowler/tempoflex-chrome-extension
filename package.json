@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@types/chrome": "0.0.124",
+    "@types/jest": "^25.1.4",
     "acorn": "^8.0.3",
     "browserify": "^16.5.2",
     "coveralls": "^3.1.0",

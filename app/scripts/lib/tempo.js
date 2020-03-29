@@ -69,11 +69,14 @@ class Tempo {
         }
 
         const getAdjustmentForToday = () => {
-            if (!this.workingDay) return Promise.resolve(0)
+            return Promise.all([this._getWorkingDayFromUserSchedule(), this.fetchWorklogTotal()])
+            .then(results => {
+                const workingDayResult = results[0]
+                if(!workingDayResult) return 0 //No adjustment needed - Tempo won't have started you in debt.
 
-            const workingDayInSeconds = this.settings.hoursPerDay * 60 * 60
-            return this.fetchWorklogTotal()
-            .then(totalSecondsToday => {
+                const totalSecondsToday = results[1]
+                const workingDayInSeconds = this.settings.hoursPerDay * 60 * 60
+
                 let adjustment = workingDayInSeconds //Credit back tempo's one-day debt at the beginning of the day
                 if (totalSecondsToday >= workingDayInSeconds) {
                     adjustment -= workingDayInSeconds //If you've worked over a full working day, credit that time back
@@ -98,24 +101,21 @@ class Tempo {
 
         let runningFlexTotal = 0
 
-        return this._getWorkingDayFromUserSchedule()
-            .then(workingDay => {
-                this.workingDay = workingDay
-                return fetchPeriodDataFromTempo()
-            })
-            .then(periodData => {
-                runningFlexTotal = sumPeriodFlex(periodData)
-                if (isNaN(runningFlexTotal)) return Promise.reject(new TempoError('Unexpected period data returned from Jira'))
-                return getAdjustmentForToday()
-            })
-            .then(adjustment => {
-                runningFlexTotal += adjustment
-                return getAdjustmentForStartDate()
-            })
-            .then(adjustment => {
-                runningFlexTotal += adjustment
-                return Promise.resolve(runningFlexTotal)
-            })
+        return Promise.all([
+            fetchPeriodDataFromTempo(),
+            getAdjustmentForStartDate(),
+            getAdjustmentForToday()
+        ])
+        .then(results => {
+            let periodData, startDateAdjustment, todayAdjustment
+            [periodData, startDateAdjustment, todayAdjustment] = results
+            
+            runningFlexTotal = sumPeriodFlex(periodData)
+            if (isNaN(runningFlexTotal)) return Promise.reject(new TempoError('Unexpected period data returned from Jira'))
+            runningFlexTotal += startDateAdjustment
+            runningFlexTotal += todayAdjustment
+            return Promise.resolve(runningFlexTotal)
+        })
     }
 
     _sumWorklogs(worklogs) {
