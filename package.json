@@ -17,7 +17,7 @@
     "coveralls": "^3.0.9",
     "del": "^5.1.0",
     "gulp": "^4.0.2",
-    "gulp-clean-css": "^4.2.0",
+    "gulp-clean-css": "^4.3.0",
     "gulp-zip": "^5.0.1",
     "humanize-duration": "^3.22.0",
     "jest": "^25.2.3",
