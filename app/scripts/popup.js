@@ -1,17 +1,21 @@
 const popupUtils = require('./lib/popupUtils')
 
-popupUtils.getFlex()
-.then(flex => {
+async function fetchIt() {
+  try {
+    const flex = await popupUtils.getFlex()
     popupUtils.setPopupText(document, flex)
-})
-.catch(err => {
-    popupUtils.setPopupText(document, err.message, 'red')
-})
+  }
+  catch(err) {
+      popupUtils.setPopupText(document, err.message, 'red')
+  }
+};
+
+fetchIt()
 
 document.getElementById('settings').addEventListener('click', function() {
-    if (chrome.runtime.openOptionsPage) {
-      chrome.runtime.openOptionsPage();
-    } else {
-      window.open(chrome.runtime.getURL('options.html'));
-    }
-  });
+  if (chrome.runtime.openOptionsPage) {
+    chrome.runtime.openOptionsPage();
+  } else {
+    window.open(chrome.runtime.getURL('options.html'));
+  }
+});

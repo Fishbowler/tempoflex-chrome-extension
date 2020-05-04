@@ -28,37 +28,40 @@ class Tempo {
         if(this.settings.useStartDate) this._generatePreStartDateUserScheduleURL(this.settings.startDate)
     }
 
-    fetchWorklogTotal() {
+    async fetchWorklogTotal() {
         const payload = `{"worker":["${this.settings.username}"], "from": "${this.todayString}", "to": "${this.todayString}"}`
-        return this._makeRequest('POST', this.worklogsUrl, payload)
-            .then((worklogs) => {
-                return Promise.resolve(this._sumWorklogs(worklogs))
-            })
-            .catch(err => {
-                let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch previous worklogs from Tempo')
-                return Promise.reject(thisErr)
-            })
+        try {
+            let worklogs = await this._makeRequest('POST', this.worklogsUrl, payload)
+            return Promise.resolve(this._sumWorklogs(worklogs))
+        }
+        catch (err) {
+            let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch previous worklogs from Tempo')
+            return Promise.reject(thisErr)
+        }
     }
 
-    fetchFutureWorklogTotal() {
+    async fetchFutureWorklogTotal() {
         const payload = `{"worker":["${this.settings.username}"], "from": "${this.tomorrowString}", "to": "${this.lastDayOfPeriodString}"}`
-        return this._makeRequest('POST', this.worklogsUrl, payload)
-            .then((worklogs) => {
-                return Promise.resolve(this._sumWorklogs(worklogs))
-            })
-            .catch(err => {
-                let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch future worklogs from Tempo')
-                return Promise.reject(thisErr)
-            })
+        
+        try {
+            let worklogs = await this._makeRequest('POST', this.worklogsUrl, payload)
+            return Promise.resolve(this._sumWorklogs(worklogs))
+        }
+        catch(err) {
+            let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch future worklogs from Tempo')
+            return Promise.reject(thisErr)
+        }
     }
 
-    fetchPeriodFlexTotal() {
-        const fetchPeriodDataFromTempo = () => {
-            return this._makeRequest('GET', this.periodsUrl)
-                .catch(err => {
-                    let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch previous periods from Tempo')
-                    return Promise.reject(thisErr)
-                });
+    async fetchPeriodFlexTotal() {
+        const fetchPeriodDataFromTempo = async () => {
+            try {
+                return await this._makeRequest('GET', this.periodsUrl)
+            }
+            catch (err) {
+                let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch previous periods from Tempo')
+                return Promise.reject(thisErr)
+            }
         }
 
         const sumPeriodFlex = (periodData) => {
@@ -68,54 +71,53 @@ class Tempo {
             return periodData.reduce(flexAccumulator, 0)
         }
 
-        const getAdjustmentForToday = () => {
-            return Promise.all([this._getWorkingDayFromUserSchedule(), this.fetchWorklogTotal()])
-            .then(results => {
-                const workingDayResult = results[0]
-                if(!workingDayResult) return 0 //No adjustment needed - Tempo won't have started you in debt.
+        const getAdjustmentForToday = async () => {
+            let results = await Promise.all([this._getWorkingDayFromUserSchedule(), this.fetchWorklogTotal()])
 
-                const totalSecondsToday = results[1]
-                const workingDayInSeconds = this.settings.hoursPerDay * 60 * 60
+            const workingDayResult = results[0]
+            if(!workingDayResult) return 0 //No adjustment needed - Tempo won't have started you in debt.
 
-                let adjustment = workingDayInSeconds //Credit back tempo's one-day debt at the beginning of the day
-                if (totalSecondsToday >= workingDayInSeconds) {
-                    adjustment -= workingDayInSeconds //If you've worked over a full working day, credit that time back
-                } else {
-                    adjustment -= totalSecondsToday //...else don't include any work done today as additional flex
-                }
-                return adjustment
-            })
+            const totalSecondsToday = results[1]
+            const workingDayInSeconds = this.settings.hoursPerDay * 60 * 60
+
+            let adjustment = workingDayInSeconds //Credit back tempo's one-day debt at the beginning of the day
+            if (totalSecondsToday >= workingDayInSeconds) {
+                adjustment -= workingDayInSeconds //If you've worked over a full working day, credit that time back
+            } else {
+                adjustment -= totalSecondsToday //...else don't include any work done today as additional flex
+            }
+            return adjustment
+
         }
 
-        const getAdjustmentForStartDate = () => {
+        const getAdjustmentForStartDate = async () => {
             if(!this.settings.useStartDate) return Promise.resolve(0)
 
-            return this._makeRequest('GET', this.userSchedulePreStartDateUrl)
-            .then(scheduleData => {
-                //TODO: Validate that API response, even if it's the second time?
-                let scheduledSeconds = scheduleData.requiredSeconds
-                scheduledSeconds -= scheduleData.days.pop().requiredSeconds //Don't adjust for the last day, because that was their first day!
-                return Promise.resolve(scheduledSeconds)
-            })
+            let scheduleData = await this._makeRequest('GET', this.userSchedulePreStartDateUrl)
+
+            //TODO: Validate that API response, even if it's the second time?
+            let scheduledSeconds = scheduleData.requiredSeconds
+            scheduledSeconds -= scheduleData.days.pop().requiredSeconds //Don't adjust for the last day, because that was their first day!
+            return Promise.resolve(scheduledSeconds)
         }
 
         let runningFlexTotal = 0
 
-        return Promise.all([
+        let results = await Promise.all([
             fetchPeriodDataFromTempo(),
             getAdjustmentForStartDate(),
             getAdjustmentForToday()
         ])
-        .then(results => {
-            let periodData, startDateAdjustment, todayAdjustment
-            [periodData, startDateAdjustment, todayAdjustment] = results
-            
-            runningFlexTotal = sumPeriodFlex(periodData)
-            if (isNaN(runningFlexTotal)) return Promise.reject(new TempoError('Unexpected period data returned from Jira'))
-            runningFlexTotal += startDateAdjustment
-            runningFlexTotal += todayAdjustment
-            return Promise.resolve(runningFlexTotal)
-        })
+
+        let periodData, startDateAdjustment, todayAdjustment
+        [periodData, startDateAdjustment, todayAdjustment] = results
+        
+        runningFlexTotal = sumPeriodFlex(periodData)
+        if (isNaN(runningFlexTotal)) return Promise.reject(new TempoError('Unexpected period data returned from Jira'))
+        runningFlexTotal += startDateAdjustment
+        runningFlexTotal += todayAdjustment
+        return Promise.resolve(runningFlexTotal)
+
     }
 
     _sumWorklogs(worklogs) {
@@ -146,15 +148,9 @@ class Tempo {
         this.userSchedulePreStartDateUrl = new URL(relativePath, this.settings.jiraBaseUrl).toString()
     }
 
-    _getWorkingDayFromUserSchedule() {
-        return this._makeRequest('GET', this.userScheduleUrl)
-            .then(scheduleData => {
-                return Promise.resolve(scheduleData.days[0].type == "WORKING_DAY")
-            })
-            .catch(err => {
-                let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch user schedule from Tempo')
-                return Promise.reject(thisErr)
-            })
+    async _getWorkingDayFromUserSchedule() {
+        let scheduleData = await this._makeRequest('GET', this.userScheduleUrl)
+        return Promise.resolve(scheduleData.days[0].type == "WORKING_DAY")
     }
 
     _makeRequest(method, url, body) {

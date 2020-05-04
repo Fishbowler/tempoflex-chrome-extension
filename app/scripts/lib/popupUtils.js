@@ -4,32 +4,23 @@ const chromeUtils = require('./chromeUtils')
 const stringUtils = require('./stringUtils')
 const Tempo = require('./tempo')
 
-const flexCalculator = (settings) => {
+const flexCalculator = async (settings) => {
 
   const tempo = new Tempo(settings)
 
-  return Promise.all([
+  let flexValues = await Promise.all([
       tempo.fetchPeriodFlexTotal(),
       tempo.fetchFutureWorklogTotal()
   ])
-  .then(flexValues => {
-    let [periodData, futureAdjustment] = flexValues
-    return periodData - futureAdjustment
-  })
-  .catch(err => {
-    return Promise.reject(err)
-  })
+  let [periodData, futureAdjustment] = flexValues
+  return periodData - futureAdjustment
 }
 
 const getFlex = async () => {
   let settings = await chromeUtils.getSettings()
-  return flexCalculator(settings)
-    .then(flex => {
-      return stringUtils.convertFlexToString(flex, settings.hoursPerDay)
-    })
-    .catch(err => {
-      return Promise.reject(err)
-    })
+  let flex = await flexCalculator(settings)
+  let flexString = await stringUtils.convertFlexToString(flex, settings.hoursPerDay)
+  return flexString
 }
 
 const setPopupText = (_document, text, colour = 'black') => {
