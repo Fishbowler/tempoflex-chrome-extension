@@ -11,7 +11,7 @@
     "test:ci": "jest && cat ./coverage/lcov.info | coveralls"
   },
   "devDependencies": {
-    "@types/chrome": "0.0.114",
+    "@types/chrome": "0.0.116",
     "acorn": "^7.2.0",
     "browserify": "^16.5.1",
     "coveralls": "^3.1.0",
