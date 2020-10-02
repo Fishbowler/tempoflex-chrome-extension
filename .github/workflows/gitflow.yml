@@ -3,7 +3,6 @@ on: pull_request
 jobs:
   build:
     runs-on: ubuntu-latest
-    working_directory: ~/repo
     steps:
       - uses: actions/checkout@v2
       - name: Setup Node
