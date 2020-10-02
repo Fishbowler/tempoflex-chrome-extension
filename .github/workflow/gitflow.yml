@@ -1,0 +1,19 @@
+name: CI
+on: pull_request
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    working_directory: ~/repo
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: v1-npm-deps-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: v1-npm-deps-
+      - run: npm ci
+      # run tests!
+      - run: npm run test:ci
