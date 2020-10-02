@@ -17,7 +17,9 @@ module.exports = {
             username: _document.getElementById('username').value,
             hoursPerDay: _document.getElementById('hoursPerDay').value,
             useStartDate: _document.getElementById('useStartDate').checked,
-            startDate: _document.getElementById('startDate').value
+            startDate: _document.getElementById('startDate').value,
+            developerSettingsVisible: _document.getElementById('developerSettingsVisible').value,
+            developerModeEnabled: _document.getElementById('developerModeEnabled').checked,
         }
 
         let jiraUrl
@@ -55,5 +57,17 @@ module.exports = {
         _document.getElementById('useStartDate').checked = settings.useStartDate
         _document.getElementById('startDate').value = settings.startDate
         _document.getElementById('startDate').min = dateUtils.dateToYYYYMMDD(new Date(new Date().setFullYear(new Date().getFullYear() - 1)))
+        _document.getElementById('useStartDate').checked = settings.developerModeEnabled
+        _document.getElementById('version').textContent = "Version:" + chrome.runtime.getManifest().version
+
+        _document.getElementById('version').addEventListener('click',function ()
+        {
+            _document.getElementById('developerModeWrapper').style.display = 'block';
+            _document.getElementById('developerSettingsVisible').value = "true";
+        });
+        
+        if(settings.developerSettingsVisible == "true") {
+            _document.getElementById('developerModeWrapper').style.display = 'block';
+        }
     }
 }
