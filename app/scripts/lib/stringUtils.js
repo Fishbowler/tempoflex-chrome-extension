@@ -1,4 +1,4 @@
-const humanizeDuration = require('humanize-duration')
+import humanizeDuration from 'humanize-duration'
 
 const getFlexDirectionText = (flex) => {
   if (flex < 0) {
@@ -48,6 +48,6 @@ const convertFlexToString = (secondsOfFlex, hoursPerDay) => {
   return printerText
 }
 
-module.exports = {
+export {
   convertFlexToString
 }

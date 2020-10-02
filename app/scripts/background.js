@@ -1,4 +1,4 @@
 'use strict';
 
-const backgroundHelpers = require('./lib/backgroundHelper')
+import * as backgroundHelpers from './lib/backgroundHelper'
 backgroundHelpers.installOrUpgradeStorage()

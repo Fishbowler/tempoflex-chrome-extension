@@ -1,5 +1,5 @@
 'use strict';
-const {saveOptions,restoreOptions} = require('./lib/optionsHelper')
+import {saveOptions,restoreOptions} from './lib/optionsHelper'
 
 window.addEventListener('load', function(){
     var checkBox = document.getElementById("useStartDate");

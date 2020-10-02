@@ -1,8 +1,9 @@
 'use strict';
 
-const chromeUtils = require('./chromeUtils')
-const stringUtils = require('./stringUtils')
-const Tempo = require('./tempo')
+import * as chromeUtils from './chromeUtils'
+import * as stringUtils from './stringUtils'
+import Tempo from './tempo'
+import "regenerator-runtime/runtime.js";
 
 const flexCalculator = async (settings) => {
 
@@ -29,7 +30,7 @@ const setPopupText = (_document, text, colour = 'black') => {
   flexInfo.style = `color: ${colour}`
 }
 
-module.exports = {
+export {
   getFlex,
   setPopupText
 }

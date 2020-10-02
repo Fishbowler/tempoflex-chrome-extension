@@ -1,6 +1,6 @@
-const testFixtures = require('./_fixtures')
-const chrome = require('sinon-chrome/extensions')
-const optionsHelper = require('../app/scripts/lib/optionsHelper')
+import * as testFixtures from './_fixtures'
+import * as chrome from 'sinon-chrome/extensions'
+import * as optionsHelper from '../app/scripts/lib/optionsHelper'
 
 const fs = require('fs')
 const optionsPage = fs.readFileSync('./app/options.html', {encoding:'utf8'})

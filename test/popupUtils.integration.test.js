@@ -1,8 +1,8 @@
-const popupUtils = require('../app/scripts/lib/popupUtils')
-const chrome = require('sinon-chrome/extensions');
-const nock = require('nock')
-const testFixtures = require('./_fixtures')
-const timekeeper = require('timekeeper')
+import * as popupUtils from '../app/scripts/lib/popupUtils'
+import * as chrome from 'sinon-chrome/extensions';
+import nock from 'nock'
+import * as testFixtures from './_fixtures'
+import * as timekeeper from 'timekeeper'
 
 const fs = require('fs')
 const popupPage = fs.readFileSync('./app/popup.html', {encoding:'utf8'})

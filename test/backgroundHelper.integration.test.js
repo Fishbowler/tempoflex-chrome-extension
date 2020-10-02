@@ -1,7 +1,7 @@
-const testFixtures = require('./_fixtures')
-const chrome = require('sinon-chrome/extensions')
-const backgroundHelper = require('../app/scripts/lib/backgroundHelper')
-const defaults = require('../app/scripts/lib/defaults')
+import * as testFixtures from './_fixtures'
+import * as chrome from 'sinon-chrome/extensions'
+import * as backgroundHelper from '../app/scripts/lib/backgroundHelper'
+import defaults from '../app/scripts/lib/defaults'
 
 describe('Post-Install Actions', ()=>{
     beforeAll(()=>{

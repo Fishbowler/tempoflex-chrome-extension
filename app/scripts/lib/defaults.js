@@ -1,6 +1,6 @@
-const dateUtils = require('./dateUtils')
+import * as dateUtils from './dateUtils'
 
-module.exports = {
+export default {
     jiraBaseUrl: 'https://myjira.net',
     periods: (new Date()).getMonth() + 1,
     username: 'jbloggs',

@@ -1,4 +1,5 @@
-const defaults = require('./defaults.js')
+import defaults from './defaults.js'
+
 
 const getSettings = () => {
     return new Promise((resolve, reject) => {
@@ -35,7 +36,7 @@ const setSettings = (settings = defaults) => {
     })
 }
 
-module.exports = {
+export {
     getSettings,
     setSettings
 }

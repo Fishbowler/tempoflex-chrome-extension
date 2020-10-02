@@ -1,55 +1,55 @@
-const defaults = require('./defaults.js')
-const chromeUtils = require('./chromeUtils')
-const dateUtils = require('./dateUtils')
+import defaults from './defaults.js'
+import * as chromeUtils from './chromeUtils'
+import * as dateUtils from './dateUtils'
+import "regenerator-runtime/runtime.js";
 
-module.exports = {
-    saveOptions: async (_document) => {
-        const updateStatus = (status) => {
-            var statusElement = _document.getElementById('saved');
-            statusElement.innerHTML = status
-            setTimeout(function () {
-                statusElement.innerHTML = '&nbsp;';
-            }, 750);
-        }
+export async function saveOptions(_document) {
+    const updateStatus = (status) => {
+        var statusElement = _document.getElementById('saved');
+        statusElement.innerHTML = status
+        setTimeout(function () {
+            statusElement.innerHTML = '&nbsp;';
+        }, 750);
+    }
 
-        const options = {
-            jiraBaseUrl: _document.getElementById('jiraURL').value,
-            username: _document.getElementById('username').value,
-            hoursPerDay: _document.getElementById('hoursPerDay').value,
-            useStartDate: _document.getElementById('useStartDate').checked,
-            startDate: _document.getElementById('startDate').value,
-            developerSettingsVisible: _document.getElementById('developerSettingsVisible').value,
-            developerModeEnabled: _document.getElementById('developerModeEnabled').checked,
-        }
+    const options = {
+        jiraBaseUrl: _document.getElementById('jiraURL').value,
+        username: _document.getElementById('username').value,
+        hoursPerDay: _document.getElementById('hoursPerDay').value,
+        useStartDate: _document.getElementById('useStartDate').checked,
+        startDate: _document.getElementById('startDate').value,
+        developerSettingsVisible: _document.getElementById('developerSettingsVisible').value,
+        developerModeEnabled: _document.getElementById('developerModeEnabled').checked,
+    }
 
-        let jiraUrl
-        try {
-            jiraUrl = new URL('/', options.jiraBaseUrl)
-        } catch (e) {
-            updateStatus('Invalid Jira URL')
+    let jiraUrl
+    try {
+        jiraUrl = new URL('/', options.jiraBaseUrl)
+    } catch (e) {
+        updateStatus('Invalid Jira URL')
+        return
+    }
+
+    const optionsToSave = Object.assign({}, defaults, options)
+
+    await chromeUtils.setSettings(optionsToSave)
+    updateStatus('Options saved.')
+
+    jiraUrl = new URL('/*', jiraUrl)
+    const newJiraURLPermission = {
+        origins: [jiraUrl.toString()]
+    }
+    chrome.permissions.request(newJiraURLPermission, (result) => {
+        if (result) {
+            console.log('User granted permission to use ' + jiraUrl.toString())
             return
         }
+        console.log('Failed to get permission to use ' + jiraUrl.toString() + ' - maybe the user rejected it?')
+        console.log(chrome.runtime.lastError)
+    })
+}
 
-        const optionsToSave = Object.assign({}, defaults, options)
-
-        await chromeUtils.setSettings(optionsToSave)
-        updateStatus('Options saved.')
-
-        jiraUrl = new URL('/*', jiraUrl)
-        const newJiraURLPermission = {
-            origins: [jiraUrl.toString()]
-        }
-        chrome.permissions.request(newJiraURLPermission, (result) => {
-            if (result) {
-                console.log('User granted permission to use ' + jiraUrl.toString())
-                return
-            }
-            console.log('Failed to get permission to use ' + jiraUrl.toString() + ' - maybe the user rejected it?')
-            console.log(chrome.runtime.lastError)
-        })
-    },
-
-    restoreOptions: async (_document) => {
+export async function restoreOptions(_document) {
 
         let settings = await chromeUtils.getSettings()
         _document.getElementById('jiraURL').value = settings.jiraBaseUrl,
@@ -75,5 +75,5 @@ module.exports = {
                 _document.getElementById('developerSettingsVisible').value = true;
             }
         });
-    }
 }
+

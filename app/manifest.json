@@ -4,15 +4,15 @@
   "manifest_version": 2,
   "description": "__MSG_appDescription__",
   "icons": {
-    "16": "images/man-flexing-legs_16.png",
-    "32": "images/man-flexing-legs_32.png",
-    "48": "images/man-flexing-legs_48.png",
-    "128": "images/man-flexing-legs_128.png"
+    "16": "man-flexing-legs_16.png",
+    "32": "man-flexing-legs_32.png",
+    "48": "man-flexing-legs_48.png",
+    "128": "man-flexing-legs_128.png"
   },
   "default_locale": "en",
   "background": {
     "scripts": [
-      "scripts/background.js"
+      "background.bundle.js"
     ]
   },
   "permissions": [
@@ -28,12 +28,13 @@
   },
   "browser_action": {
     "default_icon": {
-      "16": "images/man-flexing-legs_16.png",
-      "32": "images/man-flexing-legs_32.png",
-      "48": "images/man-flexing-legs_48.png",
-      "128": "images/man-flexing-legs_128.png"
+      "16": "man-flexing-legs_16.png",
+      "32": "man-flexing-legs_32.png",
+      "48": "man-flexing-legs_48.png",
+      "128": "man-flexing-legs_128.png"
     },
     "default_title": "TempoFlex",
     "default_popup": "popup.html"
-  }
+  },
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }
