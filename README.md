@@ -20,7 +20,8 @@ You _should_ be able to get this through the Tempo UI, but there's a few problem
 ## Developing
 
 Building the extension
-```
+
+```sh
 npm install
 npm run build
 ```
@@ -29,7 +30,7 @@ npm run build
 
 ### From Chrome Web Store
 
-Visit https://chrome.google.com/webstore/detail/tempoflex/ldinkknlmjkoigpniidlffboenkecgbp
+Visit <https://chrome.google.com/webstore/detail/tempoflex/ldinkknlmjkoigpniidlffboenkecgbp>
 
 ### Development
 
@@ -52,9 +53,9 @@ As above, but download & unzip "TempoFlex-x.x.x.zip" from the [latest release](h
 ## Oddities
 
 Tempo starts the day with every user being behind by 7½ hours (or your configured daily work hours). TempoFlex adapts to this by ignoring today's hours if today is a working day, up to the configured work hours. This means that if it's a UK Bank Holiday, or a weekend, it'll count all of today's hours since the "configured" amount should be 0 (so you probably should take a break...)
- 
+
 ## Acknowledgements
 
-[Tempo}(https://www.tempo.io/jira-project-management-tool) is a Jira plugin for recording time, among many other things. The Tempo name is theirs, and I'm in no way affiliated - I just made a tool that I found useful.
+[Tempo](https://www.tempo.io/jira-project-management-tool) is a Jira plugin for recording time, among many other things. The Tempo name is theirs, and I'm in no way affiliated - I just made a tool that I found useful.
 
 Icon made by Freepik from [www.flaticon.com](https://www.flaticon.com/free-icon/man-flexing-legs_76886)
