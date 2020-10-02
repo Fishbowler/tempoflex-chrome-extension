@@ -50,6 +50,9 @@ module.exports = {
     },
 
     restoreOptions: async (_document) => {
+
+        var clicks = 0;
+
         let settings = await chromeUtils.getSettings()
         _document.getElementById('jiraURL').value = settings.jiraBaseUrl,
         _document.getElementById('username').value = settings.username
@@ -62,8 +65,12 @@ module.exports = {
 
         _document.getElementById('version').addEventListener('click',function ()
         {
-            _document.getElementById('developerModeWrapper').style.display = 'block';
-            _document.getElementById('developerSettingsVisible').value = "true";
+            ++clicks;
+
+            if(clicks > 4) {
+                _document.getElementById('developerModeWrapper').style.display = 'block';
+                _document.getElementById('developerSettingsVisible').value = "true";
+            }
         });
         
         if(settings.developerSettingsVisible == "true") {
