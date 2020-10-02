@@ -15,6 +15,7 @@ jobs:
           path: ~/.npm
           key: v1-npm-deps-${{ hashFiles('**/package-lock.json') }}
           restore-keys: v1-npm-deps-
-      - run: npm ci
-      # run tests!
-      - run: npm run test:ci
+      - name: Install NPM modules
+        run: npm ci
+      - name: Run tests
+        run: npm run test:ci
