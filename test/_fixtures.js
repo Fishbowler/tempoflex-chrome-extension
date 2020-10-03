@@ -66,7 +66,7 @@ module.exports = {
         }
       }
     },
-    periods: { //TODO: Make a builder for this
+    periods: {
         onePeriodUnexpected: [{workedSeconds: 'zero', requiredSecondsRelativeToday: 'zero'}],
         builder: function(){
           let numberOfPeriods = 0
