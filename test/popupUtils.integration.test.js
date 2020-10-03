@@ -274,7 +274,7 @@ describe('getFlex', ()=>{
         try {
             const flex = await popupUtils.getFlex()
         } catch(e){
-            return expect(e.message).toEqual('Failed to fetch user schedule from Tempo')
+            return expect(e.message).toEqual(expect.stringMatching(/^Failed to /))
         }
     })
 
@@ -296,7 +296,7 @@ describe('getFlex', ()=>{
         try {
             const flex = await popupUtils.getFlex()
         } catch(e){
-            return expect(e.message).toEqual('Failed to fetch future worklogs from Tempo')
+            return expect(e.message).toEqual(expect.stringMatching(/^Failed to /))
         }
     })
 
