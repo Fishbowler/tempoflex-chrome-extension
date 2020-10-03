@@ -6,9 +6,9 @@ module.exports = {
     saveOptions: async (_document) => {
         const updateStatus = (status) => {
             var statusElement = _document.getElementById('saved');
-            statusElement.textContent = status
+            statusElement.innerHTML = status
             setTimeout(function () {
-                statusElement.textContent = '';
+                statusElement.innerHTML = '&nbsp;';
             }, 750);
         }
 
@@ -17,7 +17,9 @@ module.exports = {
             username: _document.getElementById('username').value,
             hoursPerDay: _document.getElementById('hoursPerDay').value,
             useStartDate: _document.getElementById('useStartDate').checked,
-            startDate: _document.getElementById('startDate').value
+            startDate: _document.getElementById('startDate').value,
+            developerSettingsVisible: _document.getElementById('developerSettingsVisible').value,
+            developerModeEnabled: _document.getElementById('developerModeEnabled').checked,
         }
 
         let jiraUrl
@@ -48,6 +50,7 @@ module.exports = {
     },
 
     restoreOptions: async (_document) => {
+
         let settings = await chromeUtils.getSettings()
         _document.getElementById('jiraURL').value = settings.jiraBaseUrl,
         _document.getElementById('username').value = settings.username
@@ -55,5 +58,22 @@ module.exports = {
         _document.getElementById('useStartDate').checked = settings.useStartDate
         _document.getElementById('startDate').value = settings.startDate
         _document.getElementById('startDate').min = dateUtils.dateToYYYYMMDD(new Date(new Date().setFullYear(new Date().getFullYear() - 1)))
+        _document.getElementById('developerModeEnabled').checked = settings.developerModeEnabled
+        _document.getElementById('version').textContent = "Version:" + chrome.runtime.getManifest().version
+        
+        if(settings.developerSettingsVisible) {
+            _document.getElementById('developerModeWrapper').style.display = 'block';
+        }
+
+        var clicks = 0;
+        _document.getElementById('version').addEventListener('click',function ()
+        {
+            ++clicks;
+
+            if(clicks > 4) {
+                _document.getElementById('developerModeWrapper').style.display = 'block';
+                _document.getElementById('developerSettingsVisible').value = true;
+            }
+        });
     }
 }

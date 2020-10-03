@@ -11,17 +11,17 @@
     <div class="options">
         <div id="jiraURLWrapper">
             <div>Jira root URL: </div>
-            <input type="text" id="jiraURL"></input><br><br>
+            <input type="text" id="jiraURL"/><br><br>
         </div>
 
         <div id="usernameWrapper">
             <div>Jira username: </div>
-            <input type="text" id="username"></input><br><br>
+            <input type="text" id="username"/><br><br>
         </div>
 
         <div id="hpdWrapper">
             <div>Hours per day: </div>
-            <input type="text" id="hoursPerDay"></input><br><br>
+            <input type="text" id="hoursPerDay"/><br><br>
         </div>
 
         <div id="startDateWrapper">
@@ -30,13 +30,23 @@
         </div>
         <input type="checkbox" id="useStartDate"><br />
         <div id="startDateShowHideWrapper" style="display:none">
-            <input type="date" id="startDate"></input><br />
+            <input type="date" id="startDate"/><br />
         </div>
             <br>
         </div>
 
+        <div id="developerModeWrapper" style="display:none">
+            <div>Enable Developer Mode: </div>
+            <input type="checkbox" id="developerModeEnabled"/><br><br>
+            <input type="hidden" id="developerSettingsVisible" value="false"/>
+        </div>
+
         <button id="save">Save</button>
-        <div id="saved"></div>
+        <div id="saved">&nbsp;</div>
+
+        <div id="versionWrapper">
+            <br/><div id="version"></div>
+        </div>
     </div>
 
     <script src="scripts/options.js"></script>

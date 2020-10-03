@@ -6,5 +6,7 @@ module.exports = {
     username: 'jbloggs',
     hoursPerDay: 7.5,
     useStartDate: false,
-    startDate: dateUtils.dateToYYYYMMDD(new Date())
+    startDate: dateUtils.dateToYYYYMMDD(new Date()),
+    developerModeEnabled: false,
+    developerSettingsVisible: false
 }
