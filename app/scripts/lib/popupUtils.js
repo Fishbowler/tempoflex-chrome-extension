@@ -1,26 +1,11 @@
 'use strict';
-
-const chromeUtils = require('./chromeUtils')
-const stringUtils = require('./stringUtils')
 const Tempo = require('./tempo')
 
-const flexCalculator = async (settings) => {
-
-  const tempo = new Tempo(settings)
-
-  let flexValues = await Promise.all([
-      tempo.fetchPeriodFlexTotal(),
-      tempo.fetchFutureWorklogTotal()
-  ])
-  let [periodData, futureAdjustment] = flexValues
-  return periodData - futureAdjustment
-}
-
 const getFlex = async () => {
-  let settings = await chromeUtils.getSettings()
-  let flex = await flexCalculator(settings)
-  let flexString = await stringUtils.convertFlexToString(flex, settings.hoursPerDay)
-  return flexString
+  const tempo = new Tempo()
+  await tempo.init()
+  const flex =  await tempo.getFlexTotal()
+  return tempo.convertFlexToString(flex)
 }
 
 const setPopupText = (_document, text, colour = 'black') => {

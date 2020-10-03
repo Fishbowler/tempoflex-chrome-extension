@@ -1,9 +1,14 @@
 const TempoError = require('./errorUtils').TempoError
 const dateUtils = require('./dateUtils')
+const stringUtils = require('./stringUtils')
+const settingsUtils = require('./settingsUtils')
 
 class Tempo {
-    constructor(settings) {
-        this.settings = settings
+
+    settings = {}
+
+    async init(){
+        this.settings = await settingsUtils.getSettings()
         this.generateDateStrings()
         this.generateUrls()
     }
@@ -207,6 +212,19 @@ class Tempo {
                         throw e
                 }
             })
+    }
+
+    convertFlexToString(flex){
+        return stringUtils.convertFlexToString(flex, this.settings.hoursPerDay)
+    }
+
+    async getFlexTotal(){
+        let flexValues = await Promise.all([
+            this.fetchPeriodFlexTotal(),
+            this.fetchFutureWorklogTotal()
+        ])
+        const [periodData, futureAdjustment] = flexValues
+        return periodData - futureAdjustment
     }
 }
 

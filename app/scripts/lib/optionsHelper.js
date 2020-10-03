@@ -1,5 +1,5 @@
 const defaults = require('./defaults.js')
-const chromeUtils = require('./chromeUtils')
+const settingsUtils = require('./settingsUtils')
 const dateUtils = require('./dateUtils')
 
 module.exports = {
@@ -32,7 +32,7 @@ module.exports = {
 
         const optionsToSave = Object.assign({}, defaults, options)
 
-        await chromeUtils.setSettings(optionsToSave)
+        await settingsUtils.setSettings(optionsToSave)
         updateStatus('Options saved.')
 
         jiraUrl = new URL('/*', jiraUrl)
@@ -51,7 +51,7 @@ module.exports = {
 
     restoreOptions: async (_document) => {
 
-        let settings = await chromeUtils.getSettings()
+        let settings = await settingsUtils.getSettings()
         _document.getElementById('jiraURL').value = settings.jiraBaseUrl,
         _document.getElementById('username').value = settings.username
         _document.getElementById('hoursPerDay').value = settings.hoursPerDay
