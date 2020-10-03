@@ -6,13 +6,15 @@ const fs = require('fs')
 const optionsPage = fs.readFileSync('./app/options.html', {encoding:'utf8'})
 
 describe('Loading Options', ()=>{
+    const defaultSettings = testFixtures.settings.builder().build()
+
     beforeAll(()=>{
         global.chrome = chrome
     })
 
     beforeEach(()=>{
         chrome.storage.sync.get.reset()
-        chrome.storage.sync.get.yields(testFixtures.settings.default)
+        chrome.storage.sync.get.yields(defaultSettings)
         chrome.runtime.lastError = null
         chrome.runtime.getManifest.returns({version: '0.0.1'})
     })
@@ -22,20 +24,23 @@ describe('Loading Options', ()=>{
         const doc = new DOMParser().parseFromString(optionsPage, 'text/html')
         await optionsHelper.restoreOptions(doc)
         expect(chrome.storage.sync.get.calledOnce).toBe(true)
-        expect(doc.getElementById('jiraURL').value).toBe(testFixtures.settings.default.jiraBaseUrl)
-        expect(doc.getElementById('username').value).toBe(testFixtures.settings.default.username)
-        expect(doc.getElementById('hoursPerDay').value).toBe(testFixtures.settings.default.hoursPerDay.toString())
-        expect(doc.getElementById('useStartDate').checked).toBe(testFixtures.settings.default.useStartDate)
-        expect(doc.getElementById('startDate').value).toBe(testFixtures.settings.default.startDate.toString())
+        expect(doc.getElementById('jiraURL').value).toBe(defaultSettings.jiraBaseUrl)
+        expect(doc.getElementById('username').value).toBe(defaultSettings.username)
+        expect(doc.getElementById('hoursPerDay').value).toBe(defaultSettings.hoursPerDay.toString())
+        expect(doc.getElementById('useStartDate').checked).toBe(defaultSettings.useStartDate)
+        expect(doc.getElementById('startDate').value).toBe(defaultSettings.startDate.toString())
     })
 
     it('will show developer mode when enabled', async()=>{
-        chrome.storage.sync.get.yields(testFixtures.settings.devModeVisible)
+        const devModeSettings = testFixtures.settings.builder()
+                                    .withProperty('developerSettingsVisible', true)
+                                    .build()
+        chrome.storage.sync.get.yields(devModeSettings)
         const doc = new DOMParser().parseFromString(optionsPage, 'text/html')
         await optionsHelper.restoreOptions(doc)
         expect(chrome.storage.sync.get.calledOnce).toBe(true)
         expect(doc.getElementById('developerModeWrapper').style.display).toBe('block')
-        expect(doc.getElementById('developerModeEnabled').checked).toBe(testFixtures.settings.devModeVisible.developerModeEnabled)
+        expect(doc.getElementById('developerModeEnabled').checked).toBe(devModeSettings.developerModeEnabled)
     })
 
     it('will enable developer mode when clicks occur', async()=>{
