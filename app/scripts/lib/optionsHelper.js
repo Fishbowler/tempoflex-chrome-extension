@@ -61,7 +61,7 @@ module.exports = {
         _document.getElementById('developerModeEnabled').checked = settings.developerModeEnabled
         _document.getElementById('version').textContent = "Version:" + chrome.runtime.getManifest().version
         
-        if(settings.developerSettingsVisible == "true") {
+        if(settings.developerSettingsVisible) {
             _document.getElementById('developerModeWrapper').style.display = 'block';
         }
 
@@ -72,7 +72,7 @@ module.exports = {
 
             if(clicks > 4) {
                 _document.getElementById('developerModeWrapper').style.display = 'block';
-                _document.getElementById('developerSettingsVisible').value = "true";
+                _document.getElementById('developerSettingsVisible').value = true;
             }
         });
     }

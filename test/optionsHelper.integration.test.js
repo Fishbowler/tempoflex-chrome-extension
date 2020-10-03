@@ -28,6 +28,30 @@ describe('Loading Options', ()=>{
         expect(doc.getElementById('useStartDate').checked).toBe(testFixtures.settings.default.useStartDate)
         expect(doc.getElementById('startDate').value).toBe(testFixtures.settings.default.startDate.toString())
     })
+
+    it('will show developer mode when enabled', async()=>{
+        chrome.storage.sync.get.yields(testFixtures.settings.devModeVisible)
+        const doc = new DOMParser().parseFromString(optionsPage, 'text/html')
+        await optionsHelper.restoreOptions(doc)
+        expect(chrome.storage.sync.get.calledOnce).toBe(true)
+        expect(doc.getElementById('developerModeWrapper').style.display).toBe('block')
+        expect(doc.getElementById('developerModeEnabled').checked).toBe(testFixtures.settings.devModeVisible.developerModeEnabled)
+    })
+
+    it('will enable developer mode when clicks occur', async()=>{
+        const doc = new DOMParser().parseFromString(optionsPage, 'text/html')
+        await optionsHelper.restoreOptions(doc)
+        expect(chrome.storage.sync.get.calledOnce).toBe(true)
+        expect(doc.getElementById('developerModeWrapper').style.display).toBe('none')
+        doc.getElementById('version').click()
+        doc.getElementById('version').click()
+        doc.getElementById('version').click()
+        doc.getElementById('version').click()
+        doc.getElementById('version').click()
+        expect(doc.getElementById('developerModeWrapper').style.display).toBe('block')
+    })
+
+    
 })
 
 describe('Saving Options', ()=>{
