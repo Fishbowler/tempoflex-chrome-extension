@@ -51,8 +51,6 @@ module.exports = {
 
     restoreOptions: async (_document) => {
 
-        var clicks = 0;
-
         let settings = await chromeUtils.getSettings()
         _document.getElementById('jiraURL').value = settings.jiraBaseUrl,
         _document.getElementById('username').value = settings.username
@@ -62,7 +60,12 @@ module.exports = {
         _document.getElementById('startDate').min = dateUtils.dateToYYYYMMDD(new Date(new Date().setFullYear(new Date().getFullYear() - 1)))
         _document.getElementById('developerModeEnabled').checked = settings.developerModeEnabled
         _document.getElementById('version').textContent = "Version:" + chrome.runtime.getManifest().version
+        
+        if(settings.developerSettingsVisible == "true") {
+            _document.getElementById('developerModeWrapper').style.display = 'block';
+        }
 
+        var clicks = 0;
         _document.getElementById('version').addEventListener('click',function ()
         {
             ++clicks;
@@ -72,9 +75,5 @@ module.exports = {
                 _document.getElementById('developerSettingsVisible').value = "true";
             }
         });
-        
-        if(settings.developerSettingsVisible == "true") {
-            _document.getElementById('developerModeWrapper').style.display = 'block';
-        }
     }
 }
