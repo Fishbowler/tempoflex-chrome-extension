@@ -60,7 +60,7 @@ module.exports = {
         _document.getElementById('useStartDate').checked = settings.useStartDate
         _document.getElementById('startDate').value = settings.startDate
         _document.getElementById('startDate').min = dateUtils.dateToYYYYMMDD(new Date(new Date().setFullYear(new Date().getFullYear() - 1)))
-        _document.getElementById('useStartDate').checked = settings.developerModeEnabled
+        _document.getElementById('developerModeEnabled').checked = settings.developerModeEnabled
         _document.getElementById('version').textContent = "Version:" + chrome.runtime.getManifest().version
 
         _document.getElementById('version').addEventListener('click',function ()
