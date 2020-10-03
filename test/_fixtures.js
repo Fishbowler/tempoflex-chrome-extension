@@ -113,12 +113,76 @@ module.exports = {
           }
         }
     },
-    userSchedules: { //TODO: Make a builder for this?
-        workingDay: {"numberOfWorkingDays":1,"requiredSeconds":27000,"days":[{"date":"2019-01-03","requiredSeconds":27000,"type":"WORKING_DAY"}]},
-        nonWorkingDay: {"numberOfWorkingDays":0,"requiredSeconds":0,"days":[{"date":"2019-01-01","requiredSeconds":0,"type":"NON_WORKING_DAY"}]},
-        Jan1stTo4th: {"numberOfWorkingDays":2,"requiredSeconds":2*8*60*60,"days":[{"date":"2019-01-01","requiredSeconds":0,"type":"NON_WORKING_DAY"},{"date":"2019-01-02","requiredSeconds":0,"type":"NON_WORKING_DAY"},{"date":"2019-01-03","requiredSeconds":8*60*60,"type":"WORKING_DAY"},{"date":"2019-01-04","requiredSeconds":8*60*60,"type":"WORKING_DAY"}]},
-        build: function(secondsPerDay, startDate, endDate){
-          //args aren't right...
+    userSchedules: {
+        builder: function(){
+          const nonWorkingDays = [
+            "2019-01-01",
+            "2019-01-02",
+            "2019-01-05",
+            "2019-01-06"
+          ]
+          const workingDays = [
+            "2019-01-03",
+            "2019-01-04",
+            "2019-01-07",
+            "2019-01-08"
+          ]
+
+          const allDays = workingDays.concat(nonWorkingDays).sort()
+
+          let startDate = "2019-01-01"
+          let secondsPerDay = 0
+          let numDays = 1
+
+          return {
+            withStartDate: function(date){
+              startDate = date
+              return this
+            },
+            withSecondsPerDay: function(seconds){
+              secondsPerDay = seconds
+              return this
+            },
+            withDays: function(days){
+              numDays = days
+              return this
+            },
+            build: function(){
+              let returnValue = {
+                "numberOfWorkingDays": 0,
+                "requiredSeconds": 0,
+                "days": []
+              }
+
+              const firstDayIndex = allDays.indexOf(startDate)
+              let secondsTotal = 0
+              let workingDaysTotal = 0
+
+              for(i = 0; i < numDays; i++){
+                const thisDate = allDays[firstDayIndex + i]
+                
+                let thisDayObject = {
+                  "date":thisDate,
+                  "requiredSeconds": secondsPerDay
+                }
+                
+                if(workingDays.includes(thisDate)){
+                  thisDayObject.type = "WORKING_DAY"
+                  secondsTotal += secondsPerDay
+                  workingDaysTotal++
+                }
+                if(nonWorkingDays.includes(thisDate)){
+                  thisDayObject.type = "NON_WORKING_DAY"
+                }
+                returnValue.days.push(thisDayObject)
+              }
+
+              returnValue.numberOfWorkingDays = workingDaysTotal
+              returnValue.requiredSeconds = secondsTotal
+
+              return returnValue
+            }
+          }
         }
     }
 }
