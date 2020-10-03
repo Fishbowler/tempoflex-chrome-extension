@@ -4,6 +4,9 @@ const nock = require('nock')
 const testFixtures = require('./_fixtures')
 const timekeeper = require('timekeeper')
 
+const fs = require('fs')
+const popupPage = fs.readFileSync('./app/popup.html', {encoding:'utf8'})
+
 describe('getFlex', ()=>{
     const defaultSettings = testFixtures.settings.builder().build()
 
@@ -360,7 +363,7 @@ describe('getFlex', ()=>{
             .reply(200, testFixtures.periods.builder().withPeriods(1).empty().build())
         nock(defaultSettings.jiraBaseUrl)
             .post(testFixtures.worklogSearchUrl, {worker: [defaultSettings.username], from:'2019-01-03', to:'2019-01-03'})
-            .reply(200, testFixtures.unexpected.emoji)
+            .reply(200, "🥔")
         nock(defaultSettings.jiraBaseUrl)
             .post(testFixtures.worklogSearchUrl, {worker: [defaultSettings.username], from:'2019-01-04', to:'2019-01-31'})
             .reply(200, [])
@@ -390,14 +393,14 @@ describe('getFlex', ()=>{
     })
 
     it('will set the popup with the appropriate value', ()=>{
-        const doc = new DOMParser().parseFromString(testFixtures.pages.popup, 'text/html')
+        const doc = new DOMParser().parseFromString(popupPage, 'text/html')
         const flex = 'Some Flex'
         popupUtils.setPopupText(doc, flex)
         expect(doc.getElementById('flextime').innerText).toBe(flex)
     })
 
     it('will set the popup with the appropriate error message', ()=>{
-        const doc = new DOMParser().parseFromString(testFixtures.pages.popup, 'text/html')
+        const doc = new DOMParser().parseFromString(popupPage, 'text/html')
         const errorMsg = 'Impossible Flex'
         popupUtils.setPopupText(doc, errorMsg, 'red')
         expect(doc.getElementById('flextime').innerText).toBe(errorMsg)
