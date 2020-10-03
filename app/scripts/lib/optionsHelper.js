@@ -6,9 +6,9 @@ module.exports = {
     saveOptions: async (_document) => {
         const updateStatus = (status) => {
             var statusElement = _document.getElementById('saved');
-            statusElement.textContent = status
+            statusElement.innerHTML = status
             setTimeout(function () {
-                statusElement.textContent = '';
+                statusElement.innerHTML = '&nbsp;';
             }, 750);
         }
 
