@@ -2,6 +2,7 @@ const TempoError = require('./errorUtils').TempoError
 const dateUtils = require('./dateUtils')
 const stringUtils = require('./stringUtils')
 const settingsUtils = require('./settingsUtils')
+const urlUtils = require('./urlUtils')
 
 class Tempo {
 
@@ -21,10 +22,12 @@ class Tempo {
     }
 
     generateUrls() {
-        this._generatePeriodsURL()
-        this._generateWorklogsURL()
-        this._generateUserScheduleURL(this.todayString, this.todayString)
-        if(this.settings.useStartDate) this._generatePreStartDateUserScheduleURL(this.settings.startDate)
+        this.periodsUrl = urlUtils.getPeriodsURL(this.settings)
+        this.worklogsUrl = urlUtils.getWorklogsURL(this.settings)
+        this.userScheduleUrl = urlUtils.getUserScheduleURL(this.settings, this.todayString, this.todayString)
+        if(this.settings.useStartDate){
+            this.userSchedulePreStartDateUrl = urlUtils.getUserScheduleURL(this.settings, this.jan1stString, this.settings.startDate)
+        }
     }
 
     async fetchWorklogTotal() {
@@ -124,26 +127,6 @@ class Tempo {
             return accumulator + currentValue.timeSpentSeconds
         }
         return worklogs.reduce(workAccumulator, 0)
-    }
-
-    _generatePeriodsURL() {
-        const relativePath = `/rest/tempo-timesheets/4/timesheet-approval/approval-statuses/?userKey=${this.settings.username}&numberOfPeriods=${this.settings.periods}`
-        this.periodsUrl = new URL(relativePath, this.settings.jiraBaseUrl).toString()
-    }
-
-    _generateWorklogsURL() {
-        const relativePath = '/rest/tempo-timesheets/4/worklogs/search'
-        this.worklogsUrl = new URL(relativePath, this.settings.jiraBaseUrl).toString()
-    }
-
-    _generateUserScheduleURL(from, to) {
-        const relativePath = `/rest/tempo-core/1/user/schedule/?user=${this.settings.username}&from=${from}&to=${to}`
-        this.userScheduleUrl = new URL(relativePath, this.settings.jiraBaseUrl).toString()
-    }
-
-    _generatePreStartDateUserScheduleURL(to) {
-        const relativePath = `/rest/tempo-core/1/user/schedule/?user=${this.settings.username}&from=${this.jan1stString}&to=${to}`
-        this.userSchedulePreStartDateUrl = new URL(relativePath, this.settings.jiraBaseUrl).toString()
     }
 
     async _getWorkingDayFromUserSchedule() {
