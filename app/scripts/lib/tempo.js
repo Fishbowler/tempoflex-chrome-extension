@@ -190,17 +190,14 @@ class Tempo {
             })
     }
 
-    convertFlexToString(flex){
-        return stringUtils.convertFlexToString(flex, this.settings.hoursPerDay)
-    }
-
     async getFlexTotal(){
         let flexValues = await Promise.all([
             this.fetchPeriodFlexTotal(),
             this.fetchFutureWorklogTotal()
         ])
         const [periodData, futureAdjustment] = flexValues
-        return periodData - futureAdjustment
+        const flex = periodData - futureAdjustment
+        return stringUtils.convertFlexToString(flex, this.settings.hoursPerDay)
     }
 }
 

@@ -4,8 +4,7 @@ const Tempo = require('./tempo')
 const getFlex = async () => {
   const tempo = new Tempo()
   await tempo.init()
-  const flex =  await tempo.getFlexTotal()
-  return tempo.convertFlexToString(flex)
+  return  await tempo.getFlexTotal()
 }
 
 const setPopupText = (_document, text, colour = 'black') => {
