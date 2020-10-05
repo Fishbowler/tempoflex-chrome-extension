@@ -1,4 +1,4 @@
-const popupUtils = require('./lib/popupUtils')
+const popupUtils = require('./lib/popupHelper')
 
 async function fetchIt() {
   try {

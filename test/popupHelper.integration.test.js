@@ -1,4 +1,4 @@
-const popupUtils = require('../app/scripts/lib/popupUtils')
+const popupUtils = require('../app/scripts/lib/popupHelper')
 const chrome = require('sinon-chrome/extensions');
 const nock = require('nock')
 const testFixtures = require('./_fixtures')
