@@ -1,8 +1,8 @@
-const TempoError = require('./errorUtils').TempoError
-const dateUtils = require('./dateUtils')
-const stringUtils = require('./stringUtils')
-const settingsUtils = require('./settingsUtils')
-const urlUtils = require('./urlUtils')
+const TempoError = require('./utils/errorUtils').TempoError
+const dateUtils = require('./utils/dateUtils')
+const stringUtils = require('./utils/stringUtils')
+const settingsUtils = require('./utils/settingsUtils')
+const urlUtils = require('./utils/urlUtils')
 
 class Tempo {
 

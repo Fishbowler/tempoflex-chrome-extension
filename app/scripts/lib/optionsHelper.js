@@ -1,6 +1,6 @@
 const defaults = require('./defaults.js')
-const settingsUtils = require('./settingsUtils')
-const dateUtils = require('./dateUtils')
+const settingsUtils = require('./utils/settingsUtils')
+const dateUtils = require('./utils/dateUtils')
 
 module.exports = {
     saveOptions: async (_document) => {

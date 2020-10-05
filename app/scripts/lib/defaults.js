@@ -1,4 +1,4 @@
-const dateUtils = require('./dateUtils')
+const dateUtils = require('./utils/dateUtils')
 
 module.exports = {
     jiraBaseUrl: 'https://myjira.net',

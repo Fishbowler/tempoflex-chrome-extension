@@ -1,4 +1,4 @@
-const settingsUtils = require('./settingsUtils')
+const settingsUtils = require('./utils/settingsUtils')
 module.exports = {
     installOrUpgradeStorage: async () => {
         chrome.runtime.onInstalled.addListener(async (details) => {
