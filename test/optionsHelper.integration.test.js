@@ -119,6 +119,20 @@ describe('Saving Options', ()=>{
         expect(global.console.log).toHaveBeenCalledWith('Failed to get permission to use https://jira.example.net/* - maybe the user rejected it?')
 
         global.console.log = originalConsoleLog
+    })
 
+    it('will fail gracefully when chrome settings storage fails', async () => {
+        expect.assertions(2)
+        const originalConsoleWarn = global.console.warn
+        global.console.warn = jest.fn()
+
+        chrome.runtime.lastError = 'Potato!'
+        const doc = new DOMParser().parseFromString(optionsPage, 'text/html')
+        doc.getElementById('jiraURL').value = 'https://jira.example.net'
+        await optionsHelper.saveOptions(doc)
+        expect(doc.getElementById('saved').textContent).toBe('Failed to save options')
+        expect(global.console.warn).toHaveBeenCalledWith('Potato!')
+        
+        global.console.warn = originalConsoleWarn
     })
 })

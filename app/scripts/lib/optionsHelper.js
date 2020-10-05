@@ -32,8 +32,13 @@ module.exports = {
 
         const optionsToSave = Object.assign({}, defaults, options)
 
-        await settingsUtils.setSettings(optionsToSave)
-        updateStatus('Options saved.')
+        try {
+            await settingsUtils.setSettings(optionsToSave)
+            updateStatus('Options saved.')
+        } catch(e) {
+            updateStatus('Failed to save options')
+        }
+        
 
         jiraUrl = new URL('/*', jiraUrl)
         const newJiraURLPermission = {
