@@ -1,4 +1,4 @@
-const defaults = require('./defaults.js')
+const defaults = require('../defaults.js')
 
 const getSettings = () => {
     return new Promise((resolve, reject) => {

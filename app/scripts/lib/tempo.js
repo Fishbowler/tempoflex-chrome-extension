@@ -1,123 +1,86 @@
-const TempoError = require('./errorUtils').TempoError
-const dateUtils = require('./dateUtils')
+const TempoError = require('./utils/errorUtils').TempoError
+const dateUtils = require('./utils/dateUtils')
+const stringUtils = require('./utils/stringUtils')
+const settingsUtils = require('./utils/settingsUtils')
+const urlUtils = require('./utils/urlUtils')
+const httpUtils = require('./utils/httpUtils')
 
 class Tempo {
-    constructor(settings) {
-        this.settings = settings
+
+    settings = {}
+
+    async init(){
+        this.settings = await settingsUtils.getSettings()
         this.generateDateStrings()
         this.generateUrls()
     }
 
     generateDateStrings() {
-
-        let today = new Date()
-        this.todayString = dateUtils.dateToYYYYMMDD(today)
-
-        let tomorrow = new Date()
-        tomorrow.setDate(tomorrow.getDate() + 1)
-        this.tomorrowString = dateUtils.dateToYYYYMMDD(tomorrow)
-
-        let lastDayOfPeriod = new Date(today.getFullYear(), today.getMonth()+1, 0);
-        this.lastDayOfPeriodString = dateUtils.dateToYYYYMMDD(lastDayOfPeriod)
+        this.todayString = dateUtils.todayString()
+        this.tomorrowString = dateUtils.tomorrowString()
+        this.lastDayOfPeriodString = dateUtils.lastDayOfThisPeriodString()
+        this.jan1stString = dateUtils.jan1stString()
     }
 
     generateUrls() {
-        this._generatePeriodsURL()
-        this._generateWorklogsURL()
-        this._generateUserScheduleURL(this.todayString, this.todayString)
-        if(this.settings.useStartDate) this._generatePreStartDateUserScheduleURL(this.settings.startDate)
+        this.periodsUrl = urlUtils.getPeriodsURL(this.settings)
+        this.worklogsUrl = urlUtils.getWorklogsURL(this.settings)
+        this.userScheduleUrl = urlUtils.getUserScheduleURL(this.settings, this.todayString, this.todayString)
+        if(this.settings.useStartDate){
+            this.userSchedulePreStartDateUrl = urlUtils.getUserScheduleURL(this.settings, this.jan1stString, this.settings.startDate)
+        }
     }
 
-    async fetchWorklogTotal() {
+    async fetchTodayWorklogTotal() {
         const payload = `{"worker":["${this.settings.username}"], "from": "${this.todayString}", "to": "${this.todayString}"}`
-        try {
-            let worklogs = await this._makeRequest('POST', this.worklogsUrl, payload)
-            return Promise.resolve(this._sumWorklogs(worklogs))
-        }
-        catch (err) {
-            let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch previous worklogs from Tempo')
-            return Promise.reject(thisErr)
-        }
+        return this._sumWorklogs(await httpUtils.makeRequest(this.worklogsUrl, 'POST', payload, 'Failed to fetch previous worklogs from Tempo'))
     }
 
     async fetchFutureWorklogTotal() {
         const payload = `{"worker":["${this.settings.username}"], "from": "${this.tomorrowString}", "to": "${this.lastDayOfPeriodString}"}`
-        
-        try {
-            let worklogs = await this._makeRequest('POST', this.worklogsUrl, payload)
-            return Promise.resolve(this._sumWorklogs(worklogs))
-        }
-        catch(err) {
-            let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch future worklogs from Tempo')
-            return Promise.reject(thisErr)
-        }
+        return this._sumWorklogs(await httpUtils.makeRequest(this.worklogsUrl, 'POST', payload, 'Failed to fetch future worklogs from Tempo'))
+    }
+
+    async fetchPeriodFlexData() {
+        return this._sumPeriodFlex(await httpUtils.makeRequest(this.periodsUrl, 'GET', null, 'Failed to fetch previous periods from Tempo'))
     }
 
     async fetchPeriodFlexTotal() {
-        const fetchPeriodDataFromTempo = async () => {
-            try {
-                return await this._makeRequest('GET', this.periodsUrl)
-            }
-            catch (err) {
-                let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch previous periods from Tempo')
-                return Promise.reject(thisErr)
-            }
-        }
 
-        const sumPeriodFlex = (periodData) => {
-            const flexAccumulator = (accumulator, currentValue) => {
-                return accumulator + currentValue.workedSeconds - currentValue.requiredSecondsRelativeToday
-            }
-            return periodData.reduce(flexAccumulator, 0)
-        }
+        const getAdjustmentForTempoStartingTheDayInDebt = async () => {
+            let [isWorkingDay, secondsWorkedToday] = await Promise.all([this._isWorkingDayFromUserSchedule(), this.fetchTodayWorklogTotal()])
 
-        const getAdjustmentForToday = async () => {
-            let results = await Promise.all([this._getWorkingDayFromUserSchedule(), this.fetchWorklogTotal()])
+            if(!isWorkingDay) return 0 //No adjustment needed - Tempo won't have started you in debt.
 
-            const workingDayResult = results[0]
-            if(!workingDayResult) return 0 //No adjustment needed - Tempo won't have started you in debt.
-
-            const totalSecondsToday = results[1]
             const workingDayInSeconds = this.settings.hoursPerDay * 60 * 60
 
-            let adjustment = workingDayInSeconds //Credit back tempo's one-day debt at the beginning of the day
-            if (totalSecondsToday >= workingDayInSeconds) {
-                adjustment -= workingDayInSeconds //If you've worked over a full working day, credit that time back
-            } else {
-                adjustment -= totalSecondsToday //...else don't include any work done today as additional flex
-            }
-            return adjustment
+            //Credit back the day tempo said you were behind when you started the day, less any work you did, up to a max of a whole day.
+            return Math.max(0, workingDayInSeconds - secondsWorkedToday)
 
         }
 
         const getAdjustmentForStartDate = async () => {
-            if(!this.settings.useStartDate) return Promise.resolve(0)
-
-            let scheduleData = await this._makeRequest('GET', this.userSchedulePreStartDateUrl)
-
-            //TODO: Validate that API response, even if it's the second time?
-            let scheduledSeconds = scheduleData.requiredSeconds
-            scheduledSeconds -= scheduleData.days.pop().requiredSeconds //Don't adjust for the last day, because that was their first day!
-            return Promise.resolve(scheduledSeconds)
+            if(!this.settings.useStartDate) return 0
+            let scheduleData = await httpUtils.makeRequest(this.userSchedulePreStartDateUrl, 'GET', null, 'Failed to fetch user schedule prior to start date')
+            return scheduleData.requiredSeconds - scheduleData.days.pop().requiredSeconds //Don't adjust for the last day, because that was their first day!
         }
 
         let runningFlexTotal = 0
 
-        let results = await Promise.all([
-            fetchPeriodDataFromTempo(),
+        let [periodData, 
+            startDateAdjustment, 
+            todayAdjustment
+        ] = await Promise.all([
+            this.fetchPeriodFlexData(),
             getAdjustmentForStartDate(),
-            getAdjustmentForToday()
+            getAdjustmentForTempoStartingTheDayInDebt()
         ])
-
-        let periodData, startDateAdjustment, todayAdjustment
-        [periodData, startDateAdjustment, todayAdjustment] = results
         
-        runningFlexTotal = sumPeriodFlex(periodData)
+        runningFlexTotal = periodData
         if (isNaN(runningFlexTotal)) return Promise.reject(new TempoError('Unexpected period data returned from Jira'))
         runningFlexTotal += startDateAdjustment
         runningFlexTotal += todayAdjustment
-        return Promise.resolve(runningFlexTotal)
-
+        return runningFlexTotal
     }
 
     _sumWorklogs(worklogs) {
@@ -127,86 +90,26 @@ class Tempo {
         return worklogs.reduce(workAccumulator, 0)
     }
 
-    _generatePeriodsURL() {
-        const relativePath = `/rest/tempo-timesheets/4/timesheet-approval/approval-statuses/?userKey=${this.settings.username}&numberOfPeriods=${this.settings.periods}`
-        this.periodsUrl = new URL(relativePath, this.settings.jiraBaseUrl).toString()
+    _sumPeriodFlex(periodData) {
+        const flexAccumulator = (accumulator, currentValue) => {
+            return accumulator + currentValue.workedSeconds - currentValue.requiredSecondsRelativeToday
+        }
+        return periodData.reduce(flexAccumulator, 0)
     }
 
-    _generateWorklogsURL() {
-        const relativePath = '/rest/tempo-timesheets/4/worklogs/search'
-        this.worklogsUrl = new URL(relativePath, this.settings.jiraBaseUrl).toString()
-    }
-
-    _generateUserScheduleURL(from, to) {
-        const relativePath = `/rest/tempo-core/1/user/schedule/?user=${this.settings.username}&from=${from}&to=${to}`
-        this.userScheduleUrl = new URL(relativePath, this.settings.jiraBaseUrl).toString()
-    }
-
-    _generatePreStartDateUserScheduleURL(to) {
-        const from = dateUtils.dateToYYYYMMDD(new Date(new Date().getFullYear(), 0, 1))
-        const relativePath = `/rest/tempo-core/1/user/schedule/?user=${this.settings.username}&from=${from}&to=${to}`
-        this.userSchedulePreStartDateUrl = new URL(relativePath, this.settings.jiraBaseUrl).toString()
-    }
-
-    async _getWorkingDayFromUserSchedule() {
-        let scheduleData = await this._makeRequest('GET', this.userScheduleUrl)
+    async _isWorkingDayFromUserSchedule() {
+        let scheduleData = await httpUtils.makeRequest(this.userScheduleUrl, 'GET', null, 'Failed to fetch user schedule for today')
         return Promise.resolve(scheduleData.days[0].type == "WORKING_DAY")
     }
 
-    _makeRequest(method, url, body) {
-        return new Promise(function (resolve, reject) {
-                var xhr = new XMLHttpRequest()
-                xhr.open(method, url)
-                xhr.setRequestHeader('Content-Type', 'application/json')
-                xhr.onload = function () {
-                    if (this.status >= 200 && this.status < 300) {
-                        try {
-                            resolve(JSON.parse(xhr.responseText))
-                        } catch(e) {
-                            reject('Unexpected content from Tempo')
-                        }
-                        
-                    } else {
-                        reject({
-                            status: this.status,
-                            statusText: xhr.statusText
-                        })
-                    }
-                }
-                xhr.onerror = function () {
-                    reject({
-                        status: this.status,
-                        statusText: xhr.statusText
-                    })
-                }
-                /* istanbul ignore next */ //Testing HTTP timeouts is too hard.
-                xhr.timeout = 10000
-                /* istanbul ignore next */
-                xhr.ontimeout = function () {
-                    reject({
-                        status: this.status,
-                        statusText: xhr.statusText
-                    })
-                }
-                if (body) {
-                    xhr.send(body)
-                } else {
-                    xhr.send()
-                }
-            })
-            .catch(e => {
-                switch (e.status) {
-                    case 401:
-                    case 403:
-                        throw new TempoError('Not authorised with Jira')
-                    case 404:
-                        throw new TempoError('Jira not found')
-                    case 0:
-                        throw new TempoError('Jira couldn\'t be contacted')
-                    default:
-                        throw e
-                }
-            })
+    async getFlexTotal() {
+        let flexValues = await Promise.all([
+            this.fetchPeriodFlexTotal(),
+            this.fetchFutureWorklogTotal()
+        ])
+        const [periodData, futureAdjustment] = flexValues
+        const flex = periodData - futureAdjustment
+        return stringUtils.convertFlexToString(flex, this.settings.hoursPerDay)
     }
 }
 

@@ -1,14 +1,14 @@
-const chromeUtils = require('./chromeUtils')
+const settingsUtils = require('./utils/settingsUtils')
 module.exports = {
     installOrUpgradeStorage: async () => {
         chrome.runtime.onInstalled.addListener(async (details) => {
             if (details.reason == 'install') {
-                await chromeUtils.setSettings()
+                await settingsUtils.setSettings()
                 chrome.runtime.openOptionsPage();
             }
             if (details.reason == 'update') {
-                let settings = await chromeUtils.getSettings()
-                await chromeUtils.setSettings(settings)
+                let settings = await settingsUtils.getSettings()
+                await settingsUtils.setSettings(settings)
             }
             return
         })
