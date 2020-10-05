@@ -3,6 +3,7 @@ const dateUtils = require('./utils/dateUtils')
 const stringUtils = require('./utils/stringUtils')
 const settingsUtils = require('./utils/settingsUtils')
 const urlUtils = require('./utils/urlUtils')
+const httpUtils = require('./utils/httpUtils')
 
 class Tempo {
 
@@ -32,38 +33,17 @@ class Tempo {
 
     async fetchWorklogTotal() {
         const payload = `{"worker":["${this.settings.username}"], "from": "${this.todayString}", "to": "${this.todayString}"}`
-        try {
-            let worklogs = await this._makeRequest('POST', this.worklogsUrl, payload)
-            return Promise.resolve(this._sumWorklogs(worklogs))
-        }
-        catch (err) {
-            let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch previous worklogs from Tempo')
-            return Promise.reject(thisErr)
-        }
+        return this._sumWorklogs(await httpUtils.makeRequest(this.worklogsUrl, 'POST', payload, 'Failed to fetch previous worklogs from Tempo'))
     }
 
     async fetchFutureWorklogTotal() {
         const payload = `{"worker":["${this.settings.username}"], "from": "${this.tomorrowString}", "to": "${this.lastDayOfPeriodString}"}`
-        
-        try {
-            let worklogs = await this._makeRequest('POST', this.worklogsUrl, payload)
-            return Promise.resolve(this._sumWorklogs(worklogs))
-        }
-        catch(err) {
-            let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch future worklogs from Tempo')
-            return Promise.reject(thisErr)
-        }
+        return this._sumWorklogs(await httpUtils.makeRequest(this.worklogsUrl, 'POST', payload, 'Failed to fetch future worklogs from Tempo'))
     }
 
     async fetchPeriodFlexTotal() {
         const fetchPeriodDataFromTempo = async () => {
-            try {
-                return await this._makeRequest('GET', this.periodsUrl)
-            }
-            catch (err) {
-                let thisErr = err instanceof TempoError ? err : new TempoError('Failed to fetch previous periods from Tempo')
-                return Promise.reject(thisErr)
-            }
+            return await httpUtils.makeRequest(this.periodsUrl, 'GET', null, 'Failed to fetch previous periods from Tempo')
         }
 
         const sumPeriodFlex = (periodData) => {
@@ -74,7 +54,7 @@ class Tempo {
         }
 
         const getAdjustmentForToday = async () => {
-            let results = await Promise.all([this._getWorkingDayFromUserSchedule(), this.fetchWorklogTotal()])
+            let results = await Promise.all([this._isWorkingDayFromUserSchedule(), this.fetchWorklogTotal()])
 
             const workingDayResult = results[0]
             if(!workingDayResult) return 0 //No adjustment needed - Tempo won't have started you in debt.
@@ -95,9 +75,7 @@ class Tempo {
         const getAdjustmentForStartDate = async () => {
             if(!this.settings.useStartDate) return Promise.resolve(0)
 
-            let scheduleData = await this._makeRequest('GET', this.userSchedulePreStartDateUrl)
-
-            //TODO: Validate that API response, even if it's the second time?
+            let scheduleData = await httpUtils.makeRequest(this.userSchedulePreStartDateUrl, 'GET', null, 'Failed to fetch user schedule prior to start date')
             let scheduledSeconds = scheduleData.requiredSeconds
             scheduledSeconds -= scheduleData.days.pop().requiredSeconds //Don't adjust for the last day, because that was their first day!
             return Promise.resolve(scheduledSeconds)
@@ -129,65 +107,9 @@ class Tempo {
         return worklogs.reduce(workAccumulator, 0)
     }
 
-    async _getWorkingDayFromUserSchedule() {
-        let scheduleData = await this._makeRequest('GET', this.userScheduleUrl)
+    async _isWorkingDayFromUserSchedule() {
+        let scheduleData = await httpUtils.makeRequest(this.userScheduleUrl, 'GET', null, 'Failed to fetch user schedule for today')
         return Promise.resolve(scheduleData.days[0].type == "WORKING_DAY")
-    }
-
-    _makeRequest(method, url, body) {
-        return new Promise(function (resolve, reject) {
-                var xhr = new XMLHttpRequest()
-                xhr.open(method, url)
-                xhr.setRequestHeader('Content-Type', 'application/json')
-                xhr.onload = function () {
-                    if (this.status >= 200 && this.status < 300) {
-                        try {
-                            resolve(JSON.parse(xhr.responseText))
-                        } catch(e) {
-                            reject('Unexpected content from Tempo')
-                        }
-                        
-                    } else {
-                        reject({
-                            status: this.status,
-                            statusText: xhr.statusText
-                        })
-                    }
-                }
-                xhr.onerror = function () {
-                    reject({
-                        status: this.status,
-                        statusText: xhr.statusText
-                    })
-                }
-                /* istanbul ignore next */ //Testing HTTP timeouts is too hard.
-                xhr.timeout = 10000
-                /* istanbul ignore next */
-                xhr.ontimeout = function () {
-                    reject({
-                        status: this.status,
-                        statusText: xhr.statusText
-                    })
-                }
-                if (body) {
-                    xhr.send(body)
-                } else {
-                    xhr.send()
-                }
-            })
-            .catch(e => {
-                switch (e.status) {
-                    case 401:
-                    case 403:
-                        throw new TempoError('Not authorised with Jira')
-                    case 404:
-                        throw new TempoError('Jira not found')
-                    case 0:
-                        throw new TempoError('Jira couldn\'t be contacted')
-                    default:
-                        throw e
-                }
-            })
     }
 
     async getFlexTotal(){
