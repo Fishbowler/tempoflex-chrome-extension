@@ -21,7 +21,6 @@ class Tempo {
     }
 
     generateUrls() {
-        this.periodsUrl = urlUtils.getPeriodsURL(this.settings)
         this.worklogsUrl = urlUtils.getWorklogsURL(this.settings)
         this.userScheduleTodayUrl = urlUtils.getUserScheduleURL(this.settings, this.todayString, this.todayString)
         this.userScheduleFullUrl = urlUtils.getUserScheduleURL(

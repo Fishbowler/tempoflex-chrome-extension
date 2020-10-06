@@ -3,7 +3,6 @@ module.exports = {
       builder: function(){
         let defaults = {
           jiraBaseUrl: 'https://jira.testcorp.net',
-          periods: 1,
           username: 'a.smith',
           hoursPerDay: 8,
           useStartDate: false,

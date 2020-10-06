@@ -1,8 +1,3 @@
-const getPeriodsURL = (settings) => {
-    const relativePath = `/rest/tempo-timesheets/4/timesheet-approval/approval-statuses/?userKey=${settings.username}&numberOfPeriods=${settings.periods}`
-    return new URL(relativePath, settings.jiraBaseUrl).toString()
-}
-
 const getWorklogsURL = (settings) => {
     const relativePath = '/rest/tempo-timesheets/4/worklogs/search'
     return new URL(relativePath, settings.jiraBaseUrl).toString()
@@ -14,7 +9,6 @@ const getUserScheduleURL = (settings, from, to) => {
 }
 
 module.exports = {
-    getPeriodsURL,
     getWorklogsURL,
     getUserScheduleURL
 }
