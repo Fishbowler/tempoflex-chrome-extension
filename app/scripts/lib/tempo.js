@@ -1,4 +1,3 @@
-const TempoError = require('./utils/errorUtils').TempoError
 const dateUtils = require('./utils/dateUtils')
 const stringUtils = require('./utils/stringUtils')
 const settingsUtils = require('./utils/settingsUtils')
