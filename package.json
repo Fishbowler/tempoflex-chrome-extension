@@ -7,7 +7,6 @@
   "scripts": {
     "build": "gulp",
     "package": "gulp package",
-    "clean": "gulp ",
     "test": "jest",
     "test:ci": "jest && cat ./coverage/lcov.info | coveralls"
   },

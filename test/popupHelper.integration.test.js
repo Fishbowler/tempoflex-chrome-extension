@@ -1,5 +1,5 @@
 const popupUtils = require('../app/scripts/lib/popupHelper')
-const chrome = require('sinon-chrome/extensions');
+const browser = require('sinon-chrome/extensions');
 const nock = require('nock')
 const testFixtures = require('./_fixtures')
 const timekeeper = require('timekeeper')
@@ -21,14 +21,14 @@ describe('getFlex', ()=>{
                             .build()
 
     beforeAll(()=>{
-        global.chrome = chrome;
+        global.browser = browser;
         global.XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest
     })
 
     beforeEach(()=>{
-        chrome.storage.sync.get.reset()
-        chrome.storage.sync.get.yields(defaultSettings)
-        chrome.runtime.lastError = null
+        browser.storage.sync.get.reset()
+        browser.storage.sync.get.yields(defaultSettings)
+        browser.runtime.lastError = null
         nock.cleanAll()
     })
 
@@ -168,7 +168,7 @@ describe('getFlex', ()=>{
     })
 
     it('will calculate flex when a user started after 1st Jan', async ()=>{
-        chrome.storage.sync.get.yields(testFixtures.settings.builder()
+        browser.storage.sync.get.yields(testFixtures.settings.builder()
                                             .withProperty('useStartDate', true)
                                             .withProperty('startDate', '2019-01-04')
                                             .build())
@@ -402,7 +402,7 @@ describe('getFlex', ()=>{
     })
 
     it('will fail gracefully when Chrome settings are empty', async ()=>{
-        chrome.storage.sync.get.yields(null)
+        browser.storage.sync.get.yields(null)
         try {
             const flex = await popupUtils.getFlex()
         } catch(e){
@@ -411,7 +411,7 @@ describe('getFlex', ()=>{
     })
 
     it('will fail gracefull when Chrome settings are inaccessible', async ()=>{
-        chrome.runtime.lastError = 'Potato!'
+        browser.runtime.lastError = 'Potato!'
         try {
             const flex = await popupUtils.getFlex()
         } catch(e){
