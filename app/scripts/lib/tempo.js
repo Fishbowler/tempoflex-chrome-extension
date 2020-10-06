@@ -18,7 +18,6 @@ class Tempo {
     generateDateStrings() {
         this.todayString = dateUtils.todayString()
         this.tomorrowString = dateUtils.tomorrowString()
-        this.lastDayOfPeriodString = dateUtils.lastDayOfThisPeriodString()
         this.jan1stString = dateUtils.jan1stString()
     }
 
@@ -31,19 +30,11 @@ class Tempo {
             (this.settings.useStartDate ? this.settings.startDate : this.jan1stString), 
             this.todayString
         )
-        if(this.settings.useStartDate){ //TODO: Cull this.
-            this.userSchedulePreStartDateUrl = urlUtils.getUserScheduleURL(this.settings, this.jan1stString, this.settings.startDate)
-        }
     }
 
     async fetchTodayWorklogTotal() {
         const payload = `{"worker":["${this.settings.username}"], "from": "${this.todayString}", "to": "${this.todayString}"}`
         return this._sumWorklogs(await httpUtils.makeRequest(this.worklogsUrl, 'POST', payload, 'Failed to fetch today\'s worklogs from Tempo'))
-    }
-
-    async fetchFutureWorklogTotal() {
-        const payload = `{"worker":["${this.settings.username}"], "from": "${this.tomorrowString}", "to": "${this.lastDayOfPeriodString}"}`
-        return this._sumWorklogs(await httpUtils.makeRequest(this.worklogsUrl, 'POST', payload, 'Failed to fetch future worklogs from Tempo'))
     }
 
     async fetchWorklogTotal() {
@@ -54,48 +45,6 @@ class Tempo {
 
     async fetchScheduleTotal() {
         return (await httpUtils.makeRequest(this.userScheduleFullUrl, 'GET', null, 'Failed to fetch full user schedule')).requiredSeconds
-    }
-
-    async fetchPeriodFlexData() {
-        return this._sumPeriodFlex(await httpUtils.makeRequest(this.periodsUrl, 'GET', null, 'Failed to fetch previous periods from Tempo'))
-    }
-
-    async fetchFlexTotalFromPeriods() {
-
-        const getAdjustmentForTempoStartingTheDayInDebt = async () => {
-            let [isWorkingDay, secondsWorkedToday] = await Promise.all([this._isWorkingDayFromUserSchedule(), this.fetchTodayWorklogTotal()])
-
-            if(!isWorkingDay) return 0 //No adjustment needed - Tempo won't have started you in debt.
-
-            const workingDayInSeconds = this.settings.hoursPerDay * 60 * 60
-
-            //Credit back the day tempo said you were behind when you started the day, less any work you did, up to a max of a whole day.
-            return Math.max(0, workingDayInSeconds - secondsWorkedToday)
-
-        }
-
-        const getAdjustmentForStartDate = async () => {
-            if(!this.settings.useStartDate) return 0
-            let scheduleData = await httpUtils.makeRequest(this.userSchedulePreStartDateUrl, 'GET', null, 'Failed to fetch user schedule prior to start date')
-            return scheduleData.requiredSeconds - scheduleData.days.pop().requiredSeconds //Don't adjust for the last day, because that was their first day!
-        }
-
-        let runningFlexTotal = 0
-
-        let [periodData, 
-            startDateAdjustment, 
-            todayAdjustment
-        ] = await Promise.all([
-            this.fetchPeriodFlexData(),
-            getAdjustmentForStartDate(),
-            getAdjustmentForTempoStartingTheDayInDebt()
-        ])
-        
-        runningFlexTotal = periodData
-        if (isNaN(runningFlexTotal)) return Promise.reject(new TempoError('Unexpected period data returned from Jira'))
-        runningFlexTotal += startDateAdjustment
-        runningFlexTotal += todayAdjustment
-        return runningFlexTotal
     }
 
     async fetchFlexTotalFromSchedulesAndWorklogs() {
@@ -128,20 +77,13 @@ class Tempo {
         return worklogs.reduce(workAccumulator, 0)
     }
 
-    _sumPeriodFlex(periodData) {
-        const flexAccumulator = (accumulator, currentValue) => {
-            return accumulator + currentValue.workedSeconds - currentValue.requiredSecondsRelativeToday
-        }
-        return periodData.reduce(flexAccumulator, 0)
-    }
-
     async _isWorkingDayFromUserSchedule() {
         let scheduleData = await httpUtils.makeRequest(this.userScheduleTodayUrl, 'GET', null, 'Failed to fetch user schedule for today')
-        return Promise.resolve(scheduleData.days[0].type == "WORKING_DAY")
+        return scheduleData.days[0].type == "WORKING_DAY"
     }
 
     async getFlexTotal() {
-        const flex = await fetchFlexTotalFromSchedulesAndWorklogs()
+        const flex = await this.fetchFlexTotalFromSchedulesAndWorklogs()
         return stringUtils.convertFlexToString(flex, this.settings.hoursPerDay)
     }
 }
