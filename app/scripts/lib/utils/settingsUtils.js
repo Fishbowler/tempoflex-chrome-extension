@@ -1,34 +1,31 @@
 const defaults = require('../defaults.js')
 
-const getSettings = () => {
-    return new Promise((resolve, reject) => {
-        const keys = Object.keys(defaults)
-        chrome.storage.sync.get(keys, (settings) => {
-            if (chrome.runtime.lastError) {
-                console.warn(chrome.runtime.lastError);
-                reject(new Error('Failed to get settings from Chrome Storage'))
-            } else if (!settings) {
-                console.warn('Failed to get settings - Empty settings returned')
-                reject(new Error('Check your settings!'))
-            } else {
-                resolve(Object.assign({}, defaults, settings))
-            }
-        })
-    })
+var browser = require("webextension-polyfill");
+
+const getSettings = async() => {
+
+    const keys = Object.keys(defaults)
+    const settings = await browser.storage.sync.get(keys)
+
+    if (browser.runtime.lastError) {
+        console.warn(browser.runtime.lastError);
+        return new Error('Failed to get settings from Browser Storage')
+    } else if (!settings) {
+        console.warn('Failed to get settings - Empty settings returned')
+       return new Error('Check your settings!')
+    } else {
+        return Object.assign({}, defaults, settings)
+    }
 }
 
-const setSettings = (settings = defaults) => {
-    return new Promise((resolve, reject) => {
-        chrome.storage.sync.set(settings, () => {
-            if (chrome.runtime.lastError) {
-                console.warn(chrome.runtime.lastError);
-                reject(new Error('Failed to write settings to Chrome Storage'))
-            } else {
-                resolve()
-            }
+const setSettings = async(settings = defaults) => {
+        
+    await browser.storage.sync.set(settings)
 
-        })
-    })
+    if (browser.runtime.lastError) {
+        console.warn(browser.runtime.lastError);
+        return new Error('Failed to write settings to Browser Storage')
+    }
 }
 
 module.exports = {

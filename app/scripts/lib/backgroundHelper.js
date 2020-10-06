@@ -1,10 +1,13 @@
 const settingsUtils = require('./utils/settingsUtils')
+
+var browser = require("webextension-polyfill");
+
 module.exports = {
     installOrUpgradeStorage: async () => {
-        chrome.runtime.onInstalled.addListener(async (details) => {
+        browser.runtime.onInstalled.addListener(async (details) => {
             if (details.reason == 'install') {
                 await settingsUtils.setSettings()
-                chrome.runtime.openOptionsPage();
+                brwoser.runtime.openOptionsPage();
             }
             if (details.reason == 'update') {
                 let settings = await settingsUtils.getSettings()

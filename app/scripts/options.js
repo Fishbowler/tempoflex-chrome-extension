@@ -1,5 +1,6 @@
 'use strict';
-const {saveOptions,restoreOptions} = require('./lib/optionsHelper')
+const {saveOptions,restoreOptions,requestPermissions} = require('./lib/optionsHelper')
+const browser = require('webextension-polyfill')
 
 window.addEventListener('load', function(){
     var checkBox = document.getElementById("useStartDate");
@@ -12,8 +13,13 @@ window.addEventListener('load', function(){
         }
     }
     checkBox.addEventListener('change', showHideStartDate);
-    restoreOptions(document)
+    restoreOptions(browser.runtime.getManifest().version, document)
     .then(showHideStartDate)
 });
 
-document.getElementById('save').addEventListener('click', function(){saveOptions(document)});
+
+document.getElementById('save').addEventListener('click', function(){
+    requestPermissions(document, document.getElementById('jiraURL').value)
+    saveOptions(document)
+});
+

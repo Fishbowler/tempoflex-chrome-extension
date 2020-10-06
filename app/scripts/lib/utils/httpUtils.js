@@ -5,6 +5,7 @@ const _makeRequest = (method, url, body) => {
             var xhr = new XMLHttpRequest()
             xhr.open(method, url)
             xhr.setRequestHeader('Content-Type', 'application/json')
+            xhr.setRequestHeader('User-Agent', 'tempo-flex')
             xhr.onload = function () {
                 if (this.status >= 200 && this.status < 300) {
                     try {

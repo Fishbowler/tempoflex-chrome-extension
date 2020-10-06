@@ -42,7 +42,7 @@ gulp.task('copyEverythingElse', () => {
   }).pipe(gulp.dest('dist'));
 });
 
-gulp.task('clean', () => del('dist'));
+gulp.task('clean', () => del('dist/**/*'));
 
 gulp.task('package', function () {
   var manifest = require('./dist/manifest.json');

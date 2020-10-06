@@ -13,9 +13,12 @@ async function fetchIt() {
 fetchIt()
 
 document.getElementById('settings').addEventListener('click', function() {
-  if (chrome.runtime.openOptionsPage) {
-    chrome.runtime.openOptionsPage();
+
+  var browser = require("webextension-polyfill");
+
+  if (browser.runtime.openOptionsPage) {
+    browser.runtime.openOptionsPage();
   } else {
-    window.open(chrome.runtime.getURL('options.html'));
+    window.open(browser.runtime.getURL('options.html'));
   }
 });
