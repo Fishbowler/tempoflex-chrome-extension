@@ -25,7 +25,6 @@ module.exports = {
         }
       }
     },
-    periodsUrl: '/rest/tempo-timesheets/4/timesheet-approval/approval-statuses/?userKey=a.smith&numberOfPeriods=1',
     worklogSearchUrl: '/rest/tempo-timesheets/4/worklogs/search',
     userScheduleUrlJan1st: '/rest/tempo-core/1/user/schedule/?user=a.smith&from=2019-01-01&to=2019-01-01',
     userScheduleUrlJan3rd: '/rest/tempo-core/1/user/schedule/?user=a.smith&from=2019-01-03&to=2019-01-03',
@@ -66,62 +65,15 @@ module.exports = {
         }
       }
     },
-    periods: {
-        onePeriodUnexpected: [{workedSeconds: 'zero', requiredSecondsRelativeToday: 'zero'}],
-        builder: function(){
-          let numberOfPeriods = 0
-          let delta = 0
-          let empty = false
-          return {
-            withPeriods: function(periods){
-              numberOfPeriods = periods
-              return this
-            },
-            withDelta: function(thisDelta){
-              delta = thisDelta
-              return this
-            },
-            empty: function(shouldBeEmpty = true){
-              empty = shouldBeEmpty
-              return this
-            },
-            build: function(){
-              let periodData = []
-              const defaultWorked = defaultRequired = 8*60*60
-
-              const buildPeriod = function(worked, required){
-                if(empty){
-                  return {workedSeconds: 0, requiredSecondsRelativeToday: 0}
-                }
-                return {workedSeconds: worked, requiredSecondsRelativeToday: required}
-              }
-              
-              if(delta < 0 && (-1 * delta) > defaultWorked){ //If the delta is behind, and by more than a day
-                periodData.push(buildPeriod(0, delta * -1)) //Make a period behind by the size of one delta
-              } else {
-                periodData.push(buildPeriod(defaultWorked + delta, defaultRequired)) //Make a period above or behind by the delta
-              }
-              
-              if(numberOfPeriods > 1){
-                for(let period = 2; period <= numberOfPeriods; period++){
-                  periodData.push(buildPeriod(defaultWorked, defaultRequired))
-                }
-              }
-
-              return periodData
-            }
-          }
-        }
-    },
     userSchedules: {
         builder: function(){
           const nonWorkingDays = [
             "2019-01-01",
-            "2019-01-02",
             "2019-01-05",
             "2019-01-06"
           ]
           const workingDays = [
+            "2019-01-02",
             "2019-01-03",
             "2019-01-04",
             "2019-01-07",
@@ -184,5 +136,8 @@ module.exports = {
             }
           }
         }
+    },
+    userScheduleUrl: (from,to)=>{
+      return `/rest/tempo-core/1/user/schedule/?user=a.smith&from=${from}&to=${to}`
     }
 }
