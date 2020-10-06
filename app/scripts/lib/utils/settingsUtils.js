@@ -11,11 +11,7 @@ const getSettings = () => {
                 console.warn('Failed to get settings - Empty settings returned')
                 reject(new Error('Check your settings!'))
             } else {
-                let settingsWithPeriods = {}
-                Object.assign(settingsWithPeriods, defaults, settings, {
-                    periods: (new Date()).getMonth() + 1
-                })
-                resolve(settingsWithPeriods)
+                resolve(Object.assign({}, defaults, settings))
             }
         })
     })
