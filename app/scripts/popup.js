@@ -1,3 +1,4 @@
+global.browser = require('webextension-polyfill') //To get it picked up by gulp
 const popupUtils = require('./lib/popupHelper')
 
 async function fetchIt() {

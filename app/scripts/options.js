@@ -1,4 +1,5 @@
 'use strict';
+global.browser = require('webextension-polyfill') //To get it picked up by gulp
 const {saveOptions,restoreOptions,requestPermissions} = require('./lib/optionsHelper')
 
 window.addEventListener('load', function(){
