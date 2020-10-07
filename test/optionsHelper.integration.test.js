@@ -124,6 +124,19 @@ describe('Saving Options', ()=>{
         expect(browser.permissions.request.calledOnce).toBe(true)
     })
 
+    it('will not request permissions with an invalid Jira URL', async ()=>{
+        expect(browser.storage.sync.set.notCalled).toBe(true)
+
+        const doc = new DOMParser().parseFromString(optionsPage, 'text/html')
+        doc.getElementById('jiraURL').value = 'potato'
+        await optionsHelper.requestPermissions(doc, doc.getElementById('jiraURL').value)
+        
+        expect(doc.getElementById('saved').textContent).toBe('Invalid Jira URL')
+        expect(browser.storage.sync.set.notCalled).toBe(true)
+        jest.runAllTimers()
+        expect(doc.getElementById('saved').innerHTML).toBe('&nbsp;')
+    })
+
     it('will log to console when new permissions are rejected', async () =>{
         const originalConsoleLog = global.console.log
         global.console.log = jest.fn()

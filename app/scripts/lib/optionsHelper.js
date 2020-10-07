@@ -14,7 +14,7 @@ module.exports = {
     saveOptions: async (_document) => {
         
         try {
-            const test = new URL('/', _document.getElementById('jiraURL').value)
+            new URL('/', _document.getElementById('jiraURL').value)
         } catch (e) {
             updateStatus(_document, 'Invalid Jira URL')
             return
@@ -43,10 +43,10 @@ module.exports = {
     requestPermissions: (_document, _rawUrl) => {
 
         try {
-            const test = new URL('/', _rawUrl)
+            new URL('/', _rawUrl)
         } catch (e) {
             updateStatus(_document, 'Invalid Jira URL')
-            throw new Error('Invalid Jira URL')
+            return
         }
         
         let jiraUrl = new URL('/*', _rawUrl)
