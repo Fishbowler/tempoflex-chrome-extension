@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@types/chrome": "0.0.124",
+    "@types/firefox-webext-browser": "^78.0.1",
     "@types/jest": "^26.0.14",
     "browserify": "^16.5.2",
     "coveralls": "^3.1.0",
@@ -23,19 +24,17 @@
     "jest": "^26.5.2",
     "merge-stream": "^2.0.0",
     "nock": "^13.0.4",
-    "sinon-chrome": "^3.0.1",
+    "sinon": "^9.2.0",
     "timekeeper": "^2.2.0",
     "vinyl-source-stream": "^2.0.0",
     "webextension-polyfill": "^0.6.0",
+    "webextensions-jsdom": "^1.4.1",
     "xmlhttprequest": "^1.8.0"
   },
   "eslintConfig": {
     "env": {
       "node": true,
       "browser": true
-    },
-    "globals": {
-      "chrome": true
     },
     "rules": {
       "eol-last": 0,

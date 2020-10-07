@@ -1,28 +1,38 @@
 const testFixtures = require('./_fixtures')
-const browser = require('sinon-chrome/extensions')
 const optionsHelper = require('../app/scripts/lib/optionsHelper')
 
 const fs = require('fs')
 const optionsPage = fs.readFileSync('./app/options.html', {encoding:'utf8'})
 
+const webExtensionsJSDOM = require("webextensions-jsdom")
+const path = require('path');
+const manifestPath = path.resolve(path.join(__dirname, '../app/manifest.json'));
+
+let webExtension
+
 describe('Loading Options', ()=>{
     const defaultSettings = testFixtures.settings.builder().build()
+    const devModeSettings = testFixtures.settings.builder()
+                                    .withProperty('developerSettingsVisible', true)
+                                    .build()
 
-    beforeAll(()=>{
-        global.browser = browser
+    beforeAll(async()=>{
+        webExtension = await webExtensionsJSDOM.fromManifest(manifestPath, {apiFake: true});
+        global.browser = webExtension.popup.browser;
     })
 
     beforeEach(()=>{
-        browser.storage.sync.get.reset()
-        browser.storage.sync.get.yields(defaultSettings)
+        browser.storage.sync.get.resolves(defaultSettings)
+        browser.storage.sync.get.resetHistory()
         browser.runtime.lastError = null
         browser.runtime.getManifest.returns({version: '0.0.1'})
     })
 
     it('will retrieve my settings', async ()=>{
-        expect(browser.storage.sync.get.notCalled).toBe(true)
         const doc = new DOMParser().parseFromString(optionsPage, 'text/html')
-        await optionsHelper.restoreOptions(doc)
+
+        expect(browser.storage.sync.get.notCalled).toBe(true)
+        await optionsHelper.restoreOptions(browser.runtime.getManifest().version, doc)
         expect(browser.storage.sync.get.calledOnce).toBe(true)
         expect(doc.getElementById('jiraURL').value).toBe(defaultSettings.jiraBaseUrl)
         expect(doc.getElementById('username').value).toBe(defaultSettings.username)
@@ -32,20 +42,19 @@ describe('Loading Options', ()=>{
     })
 
     it('will show developer mode when enabled', async()=>{
-        const devModeSettings = testFixtures.settings.builder()
-                                    .withProperty('developerSettingsVisible', true)
-                                    .build()
-        browser.storage.sync.get.yields(devModeSettings)
+        browser.storage.sync.get.resolves(devModeSettings)
         const doc = new DOMParser().parseFromString(optionsPage, 'text/html')
-        await optionsHelper.restoreOptions(doc)
-        expect(browser.storage.sync.get.calledOnce).toBe(true)
+        
+        expect(browser.storage.sync.get.notCalled).toBe(true)
+        await optionsHelper.restoreOptions(browser.runtime.getManifest().version, doc)
+        expect(browser.storage.sync.get.called).toBe(true)
         expect(doc.getElementById('developerModeWrapper').style.display).toBe('block')
         expect(doc.getElementById('developerModeEnabled').checked).toBe(devModeSettings.developerModeEnabled)
     })
 
     it('will enable developer mode when clicks occur', async()=>{
         const doc = new DOMParser().parseFromString(optionsPage, 'text/html')
-        await optionsHelper.restoreOptions(doc)
+        await optionsHelper.restoreOptions(browser.runtime.getManifest().version, doc)
         expect(browser.storage.sync.get.calledOnce).toBe(true)
         expect(doc.getElementById('developerModeWrapper').style.display).toBe('none')
         doc.getElementById('version').click()
@@ -60,16 +69,17 @@ describe('Loading Options', ()=>{
 })
 
 describe('Saving Options', ()=>{
-    beforeAll(()=>{
-        global.chrome = chrome;
+    beforeAll(async()=>{
+        webExtension = await webExtensionsJSDOM.fromManifest(manifestPath, {apiFake: true});
+        global.browser = webExtension.popup.browser;
         jest.useFakeTimers()
     })
 
     beforeEach(()=>{
-        browser.storage.sync.set.reset()
-        browser.storage.sync.set.callsArg(1)
+        browser.storage.sync.set.resetHistory()
+        browser.storage.sync.set.resolves()
         browser.permissions.request.reset()
-        browser.permissions.request.callsArgWith(1, true)
+        browser.permissions.request.resolves(true)
         browser.runtime.lastError = null
     })
 
@@ -79,9 +89,11 @@ describe('Saving Options', ()=>{
 
     it('will save my settings', async ()=>{
         expect(browser.storage.sync.set.notCalled).toBe(true)
+
         const doc = new DOMParser().parseFromString(optionsPage, 'text/html')
         doc.getElementById('jiraURL').value = 'https://jira.example.net'
         await optionsHelper.saveOptions(doc)
+        
         expect(doc.getElementById('saved').textContent).toBe('Options saved.')
         expect(browser.storage.sync.set.calledOnce).toBe(true)
         jest.runAllTimers()
@@ -90,9 +102,11 @@ describe('Saving Options', ()=>{
 
     it('will not save settings with an invalid Jira URL', async ()=>{
         expect(browser.storage.sync.set.notCalled).toBe(true)
+
         const doc = new DOMParser().parseFromString(optionsPage, 'text/html')
         doc.getElementById('jiraURL').value = 'potato'
         await optionsHelper.saveOptions(doc)
+        
         expect(doc.getElementById('saved').textContent).toBe('Invalid Jira URL')
         expect(browser.storage.sync.set.notCalled).toBe(true)
         jest.runAllTimers()
@@ -101,9 +115,12 @@ describe('Saving Options', ()=>{
 
     it('will prompt for new permissions when a new Jira URL', async () =>{
         expect(browser.permissions.request.notCalled).toBe(true)
+
         const doc = new DOMParser().parseFromString(optionsPage, 'text/html')
         doc.getElementById('jiraURL').value = 'https://jira.example.net'
-        await optionsHelper.saveOptions(doc)
+        await optionsHelper.requestPermissions(doc, doc.getElementById('jiraURL').value)
+
+        jest.runAllTimers()
         expect(browser.permissions.request.calledOnce).toBe(true)
     })
 
@@ -111,10 +128,12 @@ describe('Saving Options', ()=>{
         const originalConsoleLog = global.console.log
         global.console.log = jest.fn()
 
-        browser.permissions.request.callsArgWith(1, false)
         const doc = new DOMParser().parseFromString(optionsPage, 'text/html')
         doc.getElementById('jiraURL').value = 'https://jira.example.net'
-        await optionsHelper.saveOptions(doc)
+        browser.permissions.request.resolves(false)
+        await optionsHelper.requestPermissions(doc, doc.getElementById('jiraURL').value)
+
+        jest.runAllTimers()
         expect(browser.permissions.request.calledOnce).toBe(true)
         expect(global.console.log).toHaveBeenCalledWith('Failed to get permission to use https://jira.example.net/* - maybe the user rejected it?')
 
@@ -130,6 +149,9 @@ describe('Saving Options', ()=>{
         const doc = new DOMParser().parseFromString(optionsPage, 'text/html')
         doc.getElementById('jiraURL').value = 'https://jira.example.net'
         await optionsHelper.saveOptions(doc)
+        await (()=>{return new Promise(resolve => {
+            return setTimeout(resolve, 50);
+        })})
         expect(doc.getElementById('saved').textContent).toBe('Failed to save options')
         expect(global.console.warn).toHaveBeenCalledWith('Potato!')
         

@@ -1,11 +1,14 @@
 const popupUtils = require('../app/scripts/lib/popupHelper')
-const browser = require('sinon-chrome/extensions');
 const nock = require('nock')
 const testFixtures = require('./_fixtures')
 const timekeeper = require('timekeeper')
 
 const fs = require('fs')
 const popupPage = fs.readFileSync('./app/popup.html', {encoding:'utf8'})
+
+const webExtensionsJSDOM = require("webextensions-jsdom")
+const path = require('path');
+const manifestPath = path.resolve(path.join(__dirname, '../app/manifest.json'));
 
 describe('getFlex', ()=>{
     const defaultSettings = testFixtures.settings.builder().build()
@@ -20,14 +23,15 @@ describe('getFlex', ()=>{
                             .withSecondsPerDay(8*60*60)
                             .build()
 
-    beforeAll(()=>{
-        global.browser = browser;
+    let webExtension
+    beforeAll(async ()=>{
         global.XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest
+        webExtension = await webExtensionsJSDOM.fromManifest(manifestPath, {apiFake: true});
+        global.browser = webExtension.popup.browser;
     })
 
     beforeEach(()=>{
-        browser.storage.sync.get.reset()
-        browser.storage.sync.get.yields(defaultSettings)
+        browser.storage.sync.get.resolves(defaultSettings)
         browser.runtime.lastError = null
         nock.cleanAll()
     })
@@ -168,26 +172,26 @@ describe('getFlex', ()=>{
     })
 
     it('will calculate flex when a user started after 1st Jan', async ()=>{
-        browser.storage.sync.get.yields(testFixtures.settings.builder()
+        browser.storage.sync.get.resolves(testFixtures.settings.builder()
                                             .withProperty('useStartDate', true)
                                             .withProperty('startDate', '2019-01-04')
                                             .build())
         timekeeper.freeze(testFixtures.freezeTimeJan4th)
         nock(defaultSettings.jiraBaseUrl)
-            .get(testFixtures.userScheduleUrlJan4th)
+            .get(testFixtures.userScheduleUrl('2019-01-04','2019-01-04'))
             .reply(200, workingDay)
             .persist()
         nock(defaultSettings.jiraBaseUrl)
-            .post(testFixtures.worklogSearchUrl, {worker: [defaultSettings.username], from:'2019-01-04', to:'2019-01-04'})
-            .reply(200, [])
-            .persist()
-        nock(defaultSettings.jiraBaseUrl)
-            .get(testFixtures.userScheduleUrlJan4thStartDate)
+            .get(testFixtures.userScheduleUrl('2019-01-01','2019-01-04'))
             .reply(200, testFixtures.userSchedules.builder()
                 .withDays(4)
                 .withStartDate("2019-01-01")
                 .withSecondsPerDay(8*60*60)
                 .build())
+        nock(defaultSettings.jiraBaseUrl)
+            .post(testFixtures.worklogSearchUrl, {worker: [defaultSettings.username], from:'2019-01-04', to:'2019-01-04'})
+            .reply(200, [])
+            .persist()
         const flex = await popupUtils.getFlex()
         return expect(flex).toEqual('Your timesheet is balanced!')
     })
@@ -402,7 +406,7 @@ describe('getFlex', ()=>{
     })
 
     it('will fail gracefully when Chrome settings are empty', async ()=>{
-        browser.storage.sync.get.yields(null)
+        browser.storage.sync.get.resolves(null)
         try {
             const flex = await popupUtils.getFlex()
         } catch(e){
@@ -415,7 +419,7 @@ describe('getFlex', ()=>{
         try {
             const flex = await popupUtils.getFlex()
         } catch(e){
-            return expect(e.message).toEqual('Failed to get settings from Chrome Storage')
+            return expect(e.message).toEqual('Failed to get settings from Browser Storage')
         }
     })
 

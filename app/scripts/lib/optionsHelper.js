@@ -12,6 +12,14 @@ function updateStatus (_document, status) {
 
 module.exports = {
     saveOptions: async (_document) => {
+        
+        try {
+            const test = new URL('/', _document.getElementById('jiraURL').value)
+        } catch (e) {
+            updateStatus(_document, 'Invalid Jira URL')
+            return
+        }
+
         const options = {
             jiraBaseUrl: _document.getElementById('jiraURL').value,
             username: _document.getElementById('username').value,
@@ -34,16 +42,14 @@ module.exports = {
 
     requestPermissions: (_document, _rawUrl) => {
 
-        let jiraUrl
-
         try {
-            jiraUrl = new URL('/', _rawUrl)
+            const test = new URL('/', _rawUrl)
         } catch (e) {
-            updateStatus(document, 'Invalid Jira URL')
-            return
+            updateStatus(_document, 'Invalid Jira URL')
+            throw new Error('Invalid Jira URL')
         }
-
-        jiraUrl = new URL('/*', jiraUrl)
+        
+        let jiraUrl = new URL('/*', _rawUrl)
         const permissionsToRequest = {
             origins: [jiraUrl.toString()]
         }

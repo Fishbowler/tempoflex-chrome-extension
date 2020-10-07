@@ -1,6 +1,5 @@
 'use strict';
 const {saveOptions,restoreOptions,requestPermissions} = require('./lib/optionsHelper')
-const browser = require('webextension-polyfill')
 
 window.addEventListener('load', function(){
     var checkBox = document.getElementById("useStartDate");

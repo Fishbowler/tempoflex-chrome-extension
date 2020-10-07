@@ -14,8 +14,6 @@ fetchIt()
 
 document.getElementById('settings').addEventListener('click', function() {
 
-  var browser = require("webextension-polyfill");
-
   if (browser.runtime.openOptionsPage) {
     browser.runtime.openOptionsPage();
   } else {

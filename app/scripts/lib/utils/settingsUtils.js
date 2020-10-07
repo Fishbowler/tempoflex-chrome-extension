@@ -1,7 +1,5 @@
 const defaults = require('../defaults.js')
 
-var browser = require("webextension-polyfill");
-
 const getSettings = async() => {
 
     const keys = Object.keys(defaults)
@@ -9,10 +7,10 @@ const getSettings = async() => {
 
     if (browser.runtime.lastError) {
         console.warn(browser.runtime.lastError);
-        return new Error('Failed to get settings from Browser Storage')
+        throw new Error('Failed to get settings from Browser Storage')
     } else if (!settings) {
         console.warn('Failed to get settings - Empty settings returned')
-       return new Error('Check your settings!')
+       throw new Error('Check your settings!')
     } else {
         return Object.assign({}, defaults, settings)
     }
@@ -24,7 +22,7 @@ const setSettings = async(settings = defaults) => {
 
     if (browser.runtime.lastError) {
         console.warn(browser.runtime.lastError);
-        return new Error('Failed to write settings to Browser Storage')
+        throw new Error('Failed to write settings to Browser Storage')
     }
 }
 
