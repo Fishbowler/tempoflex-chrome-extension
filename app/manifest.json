@@ -10,6 +10,12 @@
     "128": "images/man-flexing-legs_128.png"
   },
   "default_locale": "en",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "tempoflex@fishbowler.github",
+      "strict_min_version": "80.0"
+    }
+  },
   "background": {
     "scripts": [
       "scripts/background.js"
@@ -24,7 +30,8 @@
   ],
   "options_ui": {
     "page": "options.html",
-    "chrome_style": true
+    "chrome_style": true,
+    "browser_style": true
   },
   "browser_action": {
     "default_icon": {

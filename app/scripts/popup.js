@@ -1,3 +1,4 @@
+global.browser = require('webextension-polyfill') //To get it picked up by gulp
 const popupUtils = require('./lib/popupHelper')
 
 async function fetchIt() {
@@ -13,9 +14,10 @@ async function fetchIt() {
 fetchIt()
 
 document.getElementById('settings').addEventListener('click', function() {
-  if (chrome.runtime.openOptionsPage) {
-    chrome.runtime.openOptionsPage();
+
+  if (browser.runtime.openOptionsPage) {
+    browser.runtime.openOptionsPage();
   } else {
-    window.open(chrome.runtime.getURL('options.html'));
+    window.open(browser.runtime.getURL('options.html'));
   }
 });
