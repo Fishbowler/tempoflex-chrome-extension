@@ -1,12 +1,16 @@
 name: "Build"
 on:
-  pull_request: #TODO: Change to "pull:""
+  pull_request: #TODO: Change to push
     branches:
       - master
 
 jobs:
   build:
     name: "Build"
+    strategy:
+        fail-fast: false
+        matrix:
+          browser: [firefox, chrome]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,15 +31,31 @@ jobs:
       - name: Install NPM modules
         run: npm ci
 
-      - name: Build with web-ext
+      - name: Run gulp build
+        run: npm run build
+
+      - name: Package with web-ext
+        if: matrix.browser == 'firefox'
         id: web-ext-build
         uses: kewisch/action-web-ext@v1
         with:
           cmd: build
-          source: src
+          source: dist
 
-      - name: "Upload Artifact"
-        uses: actions/upload-artifact@master
+      - name: Upload Firefox artifact
+        if: matrix.browser == 'firefox'
+        uses: actions/upload-artifact@v2
         with:
-          name: target.xpi
+          name: TempoFlex.xpi
           path: ${{ steps.web-ext-build.outputs.target }}
+
+      - name: Package with gulp
+        if: matrix.browser == 'chrome'
+        run: npm run package
+
+      - name: Upload Chrome artifact
+        if: matrix.browser == 'chrome'
+        uses: actions/upload-artifact@v2
+        with:
+          name: TempoFlex.zip
+          path: ./package/*.zip
