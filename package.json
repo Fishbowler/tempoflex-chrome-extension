@@ -6,7 +6,7 @@
   },
   "scripts": {
     "build": "gulp",
-    "package": "gulp package",
+    "package": "web-ext build --source-dir dist --artifacts-dir package --verbose --overwrite-dest",
     "test": "jest",
     "test:ci": "jest && cat ./coverage/lcov.info | coveralls"
   },

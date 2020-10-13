@@ -7,10 +7,6 @@ on:
 jobs:
   build:
     name: "Build"
-    strategy:
-        fail-fast: false
-        matrix:
-          browser: [firefox, chrome]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -35,26 +31,9 @@ jobs:
         run: npm run build
 
       - name: Package with web-ext
-        if: matrix.browser == 'firefox'
-        id: web-ext-build
-        uses: kewisch/action-web-ext@v1
-        with:
-          cmd: build
-          source: dist
-
-      - name: Upload Firefox artifact
-        if: matrix.browser == 'firefox'
-        uses: actions/upload-artifact@v2
-        with:
-          name: TempoFlex.xpi
-          path: ${{ steps.web-ext-build.outputs.target }}
-
-      - name: Package with gulp
-        if: matrix.browser == 'chrome'
         run: npm run package
 
-      - name: Upload Chrome artifact
-        if: matrix.browser == 'chrome'
+      - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: TempoFlex.zip
