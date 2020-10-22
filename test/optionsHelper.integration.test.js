@@ -4,7 +4,7 @@ const optionsHelper = require('../app/scripts/lib/optionsHelper')
 const fs = require('fs')
 const optionsPage = fs.readFileSync('./app/options.html', {encoding:'utf8'})
 
-const webExtensionsJSDOM = require("webextensions-jsdom")
+const webExtensionsJSDOM = require('webextensions-jsdom')
 const path = require('path');
 const manifestPath = path.resolve(path.join(__dirname, '../app/manifest.json'));
 

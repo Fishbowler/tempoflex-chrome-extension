@@ -6,8 +6,6 @@ const httpUtils = require('./utils/httpUtils')
 
 class Tempo {
 
-    settings = {}
-
     async init(){
         this.settings = await settingsUtils.getSettings()
         this.generateDateStrings()
@@ -77,7 +75,7 @@ class Tempo {
 
     async _isWorkingDayFromUserSchedule() {
         let scheduleData = await httpUtils.makeRequest(this.userScheduleTodayUrl, 'GET', null, 'Failed to fetch user schedule for today')
-        return scheduleData.days[0].type == "WORKING_DAY"
+        return scheduleData.days[0].type == 'WORKING_DAY'
     }
 
     async getFlexTotal() {
