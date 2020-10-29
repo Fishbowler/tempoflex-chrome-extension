@@ -11,7 +11,7 @@
     "test:ci": "jest && cat ./coverage/lcov.info | coveralls"
   },
   "devDependencies": {
-    "@types/chrome": "0.0.125",
+    "@types/chrome": "0.0.126",
     "@types/firefox-webext-browser": "^78.0.1",
     "@types/jest": "^26.0.15",
     "browserify": "^17.0.0",
