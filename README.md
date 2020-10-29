@@ -5,7 +5,7 @@
 [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/Fishbowler/tempoflex-chrome-extension.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Fishbowler/tempoflex-chrome-extension/context:javascript)
 [![Coverage Status](https://coveralls.io/repos/github/Fishbowler/tempoflex-chrome-extension/badge.svg?branch=master)](https://coveralls.io/github/Fishbowler/tempoflex-chrome-extension?branch=master)
 
-Chrome extension. Get the time spent over/under what Tempo says you should have worked, for flexible working environments.
+Browser extension for Chrome & Firefox. Get the time spent over/under what Tempo says you should have worked, for flexible working environments.
 
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/ldinkknlmjkoigpniidlffboenkecgbp)](https://chrome.google.com/webstore/detail/tempoflex/ldinkknlmjkoigpniidlffboenkecgbp)
 
@@ -17,31 +17,50 @@ Long version: Many software houses use Jira. Many people use Tempo in Jira to tr
 
 You _should_ be able to get this through the Tempo UI, but there's a few problems. For starters, before you started work today you were already behind by the number of hours you should work by the end of the day. Next, if you book time in the future (e.g. you have holiday tomorrow and want your timesheet up to date for reporting), then Tempo classes this as work done, and so you're reported as ahead, but that doesn't actually mean you can take the afternoon off. Tempo bundles everything into Periods, which means if you have a busy Jan 31st and work a couple of extra hours, Tempo shows you as "balanced" on Feb 1st (unless you dig into older periods which shows you were up on a previous period, but never reconciles).
 
-## Developing
-
-Building the extension
+## Building the extension
 
 ```sh
 npm install
 npm run build
 ```
 
-## Installing
+This will create a `dist` subfolder with the build outputs.
+
+## Installing for Chrome
 
 ### From Chrome Web Store
 
 Visit <https://chrome.google.com/webstore/detail/tempoflex/ldinkknlmjkoigpniidlffboenkecgbp>
 
-### Development
+### From source
 
 * Build the extension (above)
-* Visit chrome://extensions in Chrome
+* Navigate to chrome://extensions
 * Enable "Developer Mode" (in the top right)
-* Click "Load unpacked" and navigate to the extension folder (that's the "dist" subfolder if you've built from source)
+* Click "Load unpacked" and load the "dist" subfolder
 
 ### From a Github release
 
-As above, but download & unzip "TempoFlex-x.x.x.zip" from the [latest release](https://github.com/Fishbowler/tempoflex-chrome-extension/releases/latest)
+As per the source instructions, but download & unzip "TempoFlex-x.x.x.zip" from the [latest release](https://github.com/Fishbowler/tempoflex-chrome-extension/releases/latest)
+
+## Installing for Firefox
+
+### From Mozilla Add-ons
+
+TBA
+
+### From source
+
+* Build the extension (above)
+* Run `npm run runff` to test the extension in a isolated profile
+
+If you've made changes and need a signed version to distribute (and don't want to use Mozilla's web upload to do it):
+
+* Change the id in the manifest.json from `tempoflex@fishbowler.github` to something you want
+* Get credentials from https://addons.mozilla.org/en-GB/developers/addon/api/key/
+* Set the `WEB_EXT_API_KEY` environment variable to the JWT Issuer
+* Set the `WEB_EXT_API_SECRET` environment variable to the JWT Secret
+* Run `npm signpackage`
 
 ## Usage
 

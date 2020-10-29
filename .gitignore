@@ -4,3 +4,4 @@ package
 coverage
 
 .DS_Store
+.secrets

@@ -7,8 +7,10 @@
   "scripts": {
     "build": "gulp",
     "package": "web-ext build --source-dir dist --artifacts-dir package --verbose --overwrite-dest",
+    "signpackage": "web-ext sign --api-key $WEB_EXT_API_KEY --api-secret $WEB_EXT_API_SECRET --source-dir dist",
     "test": "jest",
-    "test:ci": "jest && cat ./coverage/lcov.info | coveralls"
+    "test:ci": "jest && cat ./coverage/lcov.info | coveralls",
+    "runff": "npx web-ext run --source-dir dist -t firefox"
   },
   "devDependencies": {
     "@types/chrome": "0.0.124",
