@@ -79,7 +79,7 @@ module.exports = {
         _document.getElementById('startDate').value = settings.startDate
         _document.getElementById('startDate').min = dateUtils.dateToYYYYMMDD(new Date(new Date().setFullYear(new Date().getFullYear() - 1)))
         _document.getElementById('developerModeEnabled').checked = settings.developerModeEnabled
-        _document.getElementById('version').textContent = "Version:" + version
+        _document.getElementById('version').textContent = 'Version:' + version
         
         if(settings.developerSettingsVisible) {
             _document.getElementById('developerModeWrapper').style.display = 'block';

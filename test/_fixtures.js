@@ -67,21 +67,21 @@ module.exports = {
     userSchedules: {
         builder: function(){
           const nonWorkingDays = [
-            "2019-01-01",
-            "2019-01-05",
-            "2019-01-06"
+            '2019-01-01',
+            '2019-01-05',
+            '2019-01-06'
           ]
           const workingDays = [
-            "2019-01-02",
-            "2019-01-03",
-            "2019-01-04",
-            "2019-01-07",
-            "2019-01-08"
+            '2019-01-02',
+            '2019-01-03',
+            '2019-01-04',
+            '2019-01-07',
+            '2019-01-08'
           ]
 
           const allDays = workingDays.concat(nonWorkingDays).sort()
 
-          let startDate = "2019-01-01"
+          let startDate = '2019-01-01'
           let secondsPerDay = 0
           let numDays = 1
 
@@ -100,9 +100,9 @@ module.exports = {
             },
             build: function(){
               let returnValue = {
-                "numberOfWorkingDays": 0,
-                "requiredSeconds": 0,
-                "days": []
+                'numberOfWorkingDays': 0,
+                'requiredSeconds': 0,
+                'days': []
               }
 
               const firstDayIndex = allDays.indexOf(startDate)
@@ -113,17 +113,17 @@ module.exports = {
                 const thisDate = allDays[firstDayIndex + i]
                 
                 let thisDayObject = {
-                  "date":thisDate,
-                  "requiredSeconds": secondsPerDay
+                  'date':thisDate,
+                  'requiredSeconds': secondsPerDay
                 }
                 
                 if(workingDays.includes(thisDate)){
-                  thisDayObject.type = "WORKING_DAY"
+                  thisDayObject.type = 'WORKING_DAY'
                   secondsTotal += secondsPerDay
                   workingDaysTotal++
                 }
                 if(nonWorkingDays.includes(thisDate)){
-                  thisDayObject.type = "NON_WORKING_DAY"
+                  thisDayObject.type = 'NON_WORKING_DAY'
                 }
                 returnValue.days.push(thisDayObject)
               }

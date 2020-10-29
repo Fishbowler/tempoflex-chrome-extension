@@ -2,7 +2,7 @@ const testFixtures = require('./_fixtures')
 const backgroundHelper = require('../app/scripts/lib/backgroundHelper')
 const defaults = require('../app/scripts/lib/defaults')
 
-const webExtensionsJSDOM = require("webextensions-jsdom")
+const webExtensionsJSDOM = require('webextensions-jsdom')
 const path = require('path');
 const manifestPath = path.resolve(path.join(__dirname, '../app/manifest.json'));
 

@@ -1,7 +1,6 @@
 const gulp = require('gulp');
 
 const cleanCSS = require('gulp-clean-css')
-const zip = require('gulp-zip')
 const del = require('del');
 const browserify = require('browserify');
 const source = require('vinyl-source-stream');
@@ -43,13 +42,6 @@ gulp.task('copyEverythingElse', () => {
 });
 
 gulp.task('clean', () => del('dist/**/*'));
-
-gulp.task('package', function () {
-  var manifest = require('./dist/manifest.json');
-  return gulp.src('dist/**')
-    .pipe(zip('TempoFlex-' + manifest.version + '.zip'))
-    .pipe(gulp.dest('package'));
-});
 
 gulp.task('build',
   gulp.series(gulp.parallel('buildScripts', 'minify-css'), 'copyEverythingElse')

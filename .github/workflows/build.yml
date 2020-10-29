@@ -1,27 +1,40 @@
-name: CI
-on: 
-  pull_request:
+name: "Build"
+on:
+  pull_request: #TODO: Change to push
     branches:
       - master
-  push:
-    branches:
-      - master
+
 jobs:
-  test:
+  build:
+    name: "Build"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Setup Node
         uses: actions/setup-node@v1
         with:
           node-version: '12'
+
       - name: Cache node modules
         uses: actions/cache@v2
         with:
           path: ~/.npm
           key: v1-npm-deps-${{ hashFiles('**/package-lock.json') }}
           restore-keys: v1-npm-deps-
+
       - name: Install NPM modules
         run: npm ci
-      - name: Run tests
-        run: npm run test:ci
+
+      - name: Run gulp build
+        run: npm run build
+
+      - name: Package with web-ext
+        run: npm run package
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: TempoFlex.zip
+          path: ./package/*.zip

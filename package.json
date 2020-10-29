@@ -6,9 +6,11 @@
   },
   "scripts": {
     "build": "gulp",
-    "package": "gulp package",
+    "package": "web-ext build --source-dir dist --artifacts-dir package --verbose --overwrite-dest",
+    "signpackage": "web-ext sign --api-key $WEB_EXT_API_KEY --api-secret $WEB_EXT_API_SECRET --source-dir dist",
     "test": "jest",
-    "test:ci": "jest && cat ./coverage/lcov.info | coveralls"
+    "test:ci": "jest && cat ./coverage/lcov.info | coveralls",
+    "runff": "npx web-ext run --source-dir dist -t firefox"
   },
   "devDependencies": {
     "@types/chrome": "0.0.126",
@@ -27,6 +29,7 @@
     "sinon": "^9.2.1",
     "timekeeper": "^2.2.0",
     "vinyl-source-stream": "^2.0.0",
+    "web-ext": "^5.2.0",
     "webextension-polyfill": "^0.6.0",
     "webextensions-jsdom": "^1.4.1",
     "xmlhttprequest": "^1.8.0"

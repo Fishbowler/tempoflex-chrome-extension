@@ -3,13 +3,13 @@ global.browser = require('webextension-polyfill') //To get it picked up by gulp
 const {saveOptions,restoreOptions,requestPermissions} = require('./lib/optionsHelper')
 
 window.addEventListener('load', function(){
-    var checkBox = document.getElementById("useStartDate");
+    var checkBox = document.getElementById('useStartDate');
     function showHideStartDate(){
-        var div = document.getElementById("startDateShowHideWrapper");
+        var div = document.getElementById('startDateShowHideWrapper');
         if (checkBox.checked == true) {
-            div.style.display = "block";
+            div.style.display = 'block';
         } else {
-            div.style.display = "none";
+            div.style.display = 'none';
         }
     }
     checkBox.addEventListener('change', showHideStartDate);
