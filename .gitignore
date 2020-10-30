@@ -1,6 +1,7 @@
 node_modules
 dist
 package
+web-ext-artifacts
 coverage
 
 .DS_Store
