@@ -7,8 +7,11 @@
   "scripts": {
     "build": "gulp",
     "package": "web-ext build --source-dir dist --artifacts-dir package --verbose --overwrite-dest",
-    "signpackage": "web-ext sign --api-key $WEB_EXT_API_KEY --api-secret $WEB_EXT_API_SECRET --source-dir dist",
-    "test": "jest",
+    "signpackage": "web-ext sign --api-key $WEB_EXT_API_KEY --api-secret $WEB_EXT_API_SECRET --source-dir dist --channel=listed",
+    "signtestpackage": "npm run testversionbump && web-ext sign --api-key $WEB_EXT_API_KEY --api-secret $WEB_EXT_API_SECRET --source-dir dist --channel=unlisted",
+    "testversionbump": "node util/test_versioning",
+    "lint": "web-ext lint --source-dir dist",
+    "test": "npm run lint && jest",
     "test:ci": "jest && cat ./coverage/lcov.info | coveralls",
     "runff": "npx web-ext run --source-dir dist -t firefox"
   },
