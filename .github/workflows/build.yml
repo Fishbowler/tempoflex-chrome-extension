@@ -30,6 +30,9 @@ jobs:
       - name: Run gulp build
         run: npm run build
 
+      - name: Lint
+        run: npm run lint
+
       - name: Package with web-ext
         run: npm run package
 
