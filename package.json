@@ -16,7 +16,7 @@
     "runff": "npx web-ext run --source-dir dist -t firefox"
   },
   "devDependencies": {
-    "@types/chrome": "0.0.145",
+    "@types/chrome": "0.0.149",
     "@types/firefox-webext-browser": "^82.0.0",
     "@types/jest": "^26.0.23",
     "browserify": "^17.0.0",
